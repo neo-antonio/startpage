@@ -281,8 +281,19 @@ const hue=s=>{let h=0;for(const c of s)h=(h*31+c.charCodeAt(0))%360;return`hsl($
 function tile(it){const d=el('div','tile');
  const letter=()=>{d.className='tile';d.replaceChildren();d.textContent=(it.name||'?')[0].toUpperCase();d.style.background=hue(it.name||'?')};
  const h=host(it.url),src=it.img||(h&&'https://www.google.com/s2/favicons?sz=128&domain='+h);
- if(src){d.classList.add('has',it.img&&!/^https:\/\/api\.iconify\.design\//.test(it.img)?'cus':'fav');const i=new Image();i.alt='';i.draggable=false;i.onerror=letter;i.src=src;if(it.img&&it.scale){i.style.width=i.style.height=it.scale+'%';i.style.objectFit='contain'}d.append(i)}else letter();return d}
+ if(src){d.classList.add('has',it.img&&!/^https:\/\/api\.iconify\.design\//.test(it.img)?'cus':'fav');const i=new Image();i.alt='';i.draggable=false;i.onerror=letter;if(isIc(src))icGet(src).then(u=>{i.src=u},letter);else i.src=src;if(it.img&&it.scale){i.style.width=i.style.height=it.scale+'%';i.style.objectFit='contain'}d.append(i)}else letter();return d}
 const defScale=it=>/^https:\/\/api\.iconify\.design\//.test(it.img||'')?64:(S.round!==false?78:100);
+/* Iconify cache: each icon SVG is downloaded once, kept in localStorage, and reused (avoids API rate limits) */
+const ICK='startpage.v1.icons',isIc=u=>/^https:\/\/api\.iconify\.design\//.test(u||'');
+const icMem=(()=>{try{const c=JSON.parse(localStorage.getItem(ICK));return c&&typeof c==='object'&&!Array.isArray(c)?c:{}}catch(e){return{}}})();
+let icT=0;const icSave=()=>{clearTimeout(icT);icT=setTimeout(()=>{try{localStorage.setItem(ICK,JSON.stringify(icMem))}catch(e){}},400)};
+const icUri=t=>'data:image/svg+xml;charset=utf-8,'+encodeURIComponent(t);
+const icQ=[],icWait=new Map();let icBusy=0;
+function icPump(){while(icBusy<3&&icQ.length){const j=icQ.shift();icBusy++;
+ fetch(j.u).then(r=>{if(!r.ok)throw 0;return r.text()}).then(t=>{if(!/<svg[\s>]/i.test(t))throw 0;icMem[j.u]=t;icSave();j.ok(icUri(t))}).catch(()=>j.no()).finally(()=>{icBusy--;icPump()})}}
+function icGet(u){if(icMem[u])return Promise.resolve(icUri(icMem[u]));if(icWait.has(u))return icWait.get(u);
+ const p=new Promise((ok,no)=>{icQ.push({u,ok,no});icPump()});icWait.set(u,p);const done=()=>icWait.delete(u);p.then(done,done);return p}
+setTimeout(()=>{const used=new Set((S.items||[]).map(x=>x.img));let ch=0;for(const k of Object.keys(icMem))if(!used.has(k)){delete icMem[k];ch=1}if(ch)icSave()},4000);
 const HK='startpage.v1.hits';
 const getHits=()=>{try{const h=JSON.parse(localStorage.getItem(HK));return h&&typeof h==='object'?h:{}}catch(e){return{}}};
 const setHits=h=>{try{localStorage.setItem(HK,JSON.stringify(h))}catch(e){}};
