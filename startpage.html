@@ -154,6 +154,19 @@ body.ctr #desk{display:flex;flex-wrap:wrap;justify-content:center}
 .seg{display:inline-flex;justify-self:start;background:var(--hover);border-radius:10px;padding:3px}
 .seg button{border:0;background:none;color:var(--dim);padding:5px 14px;border-radius:8px;transition:all .2s}
 .seg .on{background:var(--pop);color:var(--text);box-shadow:0 1px 3px rgba(16,24,40,.14)}
+#sort.act{color:var(--accent)}
+#ctx button.ck{display:flex;align-items:center}
+#ctx button.ck::before{content:'';width:20px;flex:none;font-size:13px;color:var(--accent)}
+#ctx button.ck.on::before{content:'✓'}
+.btn:disabled{opacity:.45;cursor:default}.btn:disabled:hover{background:var(--pop)}
+.ulist{max-height:210px;overflow:auto;margin:0 -4px 10px;padding:0 4px}
+.ur{display:flex;align-items:center;gap:10px;padding:4px 0}
+.ur .tile{width:26px;height:26px;border-radius:8px;margin:0;font-size:12px;box-shadow:none;flex:none}
+.ur .c{color:var(--dim);font-size:13px;font-variant-numeric:tabular-nums}
+body.rnd .tile,body.rnd.rail .row .tile{border-radius:30%}
+body:not(.rnd) .tile,body:not(.rnd).rail .row .tile{border-radius:8%}
+body.rnd .tile.cus img{width:78%;height:78%;border-radius:24%}
+.sec .tgl+.tgl{margin-top:14px}
 @media(prefers-reduced-motion:reduce){*,::backdrop{animation:none!important;transition:none!important}}
 </style>
 </head>
@@ -163,13 +176,14 @@ body.ctr #desk{display:flex;flex-wrap:wrap;justify-content:center}
   <aside>
     <div class="sh">
       <span>Shortcuts</span>
+      <button class="ib" id="sort" title="Sort shortcuts" aria-label="Sort shortcuts"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h16M7 12h10M10 17h4"/></svg></button>
       <button class="ib" id="add" title="New shortcut" aria-label="New shortcut">+</button>
       <button class="ib" id="tog" title="Collapse or expand sidebar" aria-label="Collapse or expand sidebar"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 6-6 6 6 6"/></svg></button>
     </div>
     <input id="q" type="search" placeholder="Search" aria-label="Search">
     <div id="tags"></div>
     <div id="list"></div>
-    <div class="sfoot"><button id="look" title="Appearance"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 3v2M12 19v2M3 12h2M19 12h2M5.6 5.6 7 7M17 17l1.4 1.4M5.6 18.4 7 17M17 7l1.4-1.4"/></svg><span class="gl">Appearance</span></button><button id="gear" title="Settings"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h9M19 7h1M4 17h1M11 17h9"/><circle cx="16" cy="7" r="2.4"/><circle cx="8" cy="17" r="2.4"/></svg><span class="gl">Settings</span></button></div>
+    <div class="sfoot"><button id="look" title="Appearance"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><g transform="rotate(45 12 12)"><rect x="10.5" y="1.5" width="3" height="8.5" rx="1.5"/><path d="M9.5 10h5v3.5h-5z"/><path d="M9.5 13.5h5v2.5c0 2.2-1.3 4.2-2.5 5.5-1.2-1.3-2.5-3.3-2.5-5.5z"/></g></svg><span class="gl">Appearance</span></button><button id="gear" title="Settings"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h9M19 7h1M4 17h1M11 17h9"/><circle cx="16" cy="7" r="2.4"/><circle cx="8" cy="17" r="2.4"/></svg><span class="gl">Settings</span></button></div>
   </aside>
   <main>
     <div id="clock"><span id="ck"></span><span id="cd"></span></div>
@@ -240,7 +254,7 @@ function applyTheme(){const t=THEMES[S.theme]||THEMES.light,r=document.documentE
  for(const k of['text','dim','line','hover','pop','panel'])r.setProperty('--'+k,t[k]);
  r.setProperty('--accent',acc);r.setProperty('--onacc',lum(acc)>.6?'#000':'#fff');
  $('#bg').style.background=S.bgi?`center/cover no-repeat url("${S.bgi}")`:(S.bgc||t.bg);
- document.body.classList.toggle('rail',!S.sb);document.body.classList.toggle('img',!!S.bgi);document.body.classList.toggle('ctr',!!S.center);document.body.classList.toggle('dbg',!!(S.bgc&&/^#[0-9a-f]{6}$/i.test(S.bgc)&&lum(S.bgc)<.45&&!S.bgi))}
+ document.body.classList.toggle('rail',!S.sb);document.body.classList.toggle('rnd',S.round!==false);document.body.classList.toggle('img',!!S.bgi);document.body.classList.toggle('ctr',!!S.center);document.body.classList.toggle('dbg',!!(S.bgc&&/^#[0-9a-f]{6}$/i.test(S.bgc)&&lum(S.bgc)<.45&&!S.bgi))}
 const norm=u=>/^[a-z][a-z0-9+.-]*:/i.test(u)?u:'https://'+u;
 const host=u=>{try{return new URL(norm(u)).hostname}catch(e){return''}};
 const hue=s=>{let h=0;for(const c of s)h=(h*31+c.charCodeAt(0))%360;return`hsl(${h} 48% 48%)`};
@@ -248,11 +262,32 @@ function tile(it){const d=el('div','tile');
  const letter=()=>{d.className='tile';d.replaceChildren();d.textContent=(it.name||'?')[0].toUpperCase();d.style.background=hue(it.name||'?')};
  const h=host(it.url),src=it.img||(h&&'https://www.google.com/s2/favicons?sz=128&domain='+h);
  if(src){d.classList.add('has',it.img&&!/^https:\/\/api\.iconify\.design\//.test(it.img)?'cus':'fav');const i=new Image();i.alt='';i.draggable=false;i.onerror=letter;i.src=src;d.append(i)}else letter();return d}
-const byFolder=id=>S.items.filter(i=>(i.folder||'')===id);
+const HK='startpage.v1.hits';
+const getHits=()=>{try{const h=JSON.parse(localStorage.getItem(HK));return h&&typeof h==='object'?h:{}}catch(e){return{}}};
+const setHits=h=>{try{localStorage.setItem(HK,JSON.stringify(h))}catch(e){}};
+let dirty=0;
+function hit(id){const h=getHits();h[id]=(h[id]||0)+1;setHits(h);dirty=1}
+const SORTS={custom:'Custom',az:'Alphabetical',freq:'Most used'};
+if(!SORTS[S.sort])S.sort='custom';
+const cmpN=(a,b)=>(a.name||'').localeCompare(b.name||'',undefined,{numeric:true,sensitivity:'base'});
+const itemScore=(i,h)=>h[i.id]||0;
+const folderScore=(f,h)=>S.items.reduce((n,i)=>i.folder===f.id?n+(h[i.id]||0):n,0);
+function sortBy(arr,score,h){
+ if(S.sort==='az')return[...arr].sort(cmpN);
+ if(S.sort==='freq'){const m=new Map(arr.map(x=>[x,score(x,h)]));return[...arr].sort((a,b)=>m.get(b)-m.get(a)||cmpN(a,b))}
+ return arr}
+const hs=()=>S.sort==='freq'?getHits():null;
+const sortedFolders=()=>sortBy(S.folders,folderScore,hs());
+const byFolder=id=>sortBy(S.items.filter(i=>(i.folder||'')===id),itemScore,hs());
+/* bake the currently displayed sorted order into the stored custom order */
+function freezeSort(){if(S.sort==='custom')return;
+ const fs=sortedFolders(),out=[...byFolder('')];fs.forEach(f=>out.push(...byFolder(f.id)));const d=deskIds();
+ S.folders=fs;S.items=out.concat(S.items.filter(i=>!out.includes(i)));S.desk=d;S.sort='custom'}
+function syncSort(){const b=$('#sort');b.classList.toggle('act',S.sort!=='custom');b.title='Sort: '+SORTS[S.sort]}
 const folderTile=f=>{const d=el('div','tile fold');d.innerHTML=glyph(f.icon||'folder');return d};
 const link=(it,c)=>{const a=el('a',c);a.href=norm(it.url);a.target='_blank';a.rel='noopener';a.dataset.t='i';a.dataset.id=it.id;return a};
 let tagF='',q='';
-function render(){renderSide();renderDesk();renderWins()}
+function render(){syncSort();renderSide();renderDesk();renderWins()}
 function renderSide(){
  const rail=!S.sb,tags=[...new Set(S.items.map(i=>i.tag).filter(Boolean))].sort();
  if(tagF&&!tags.includes(tagF))tagF='';
@@ -261,7 +296,7 @@ function renderSide(){
  const list=$('#list');list.replaceChildren();
  const row=i=>{const a=link(i,'row');a.title=i.name+(i.desc?' — '+i.desc:'');a.draggable=can;const tx=el('span','tx');tx.append(el('span','nm',i.name));if(i.desc)tx.append(el('span','ds',i.desc));a.append(tile(i),tx);if(i.tag)a.append(el('span','tag',i.tag));return a};
  byFolder('').filter(ok).forEach(i=>list.append(row(i)));
- S.folders.forEach(f=>{const its=byFolder(f.id).filter(ok);
+ sortedFolders().forEach(f=>{const its=byFolder(f.id).filter(ok);
   if(rail){if(its.length){list.append(el('hr'));its.forEach(i=>list.append(row(i)))}return}
   if(!its.length&&(tagF||q))return;
   const shut=(S.closed||[]).includes(f.id),d=el('details','grp'+(shut?' closed':''));d.open=!shut;d.dataset.t='f';d.dataset.id=f.id;
@@ -277,22 +312,22 @@ function toggleGrp(d,id,c){const open=!d.open,E='cubic-bezier(.2,.8,.2,1)';d.cla
 function flipIn(root,sel,fn){const m=new Map();root.querySelectorAll(sel).forEach(n=>m.set(n,n.getBoundingClientRect()));fn();
  if(RM)return;m.forEach((o,n)=>{const r=n.getBoundingClientRect(),dx=o.left-r.left,dy=o.top-r.top;if(dx||dy)n.animate([{transform:`translate(${dx}px,${dy}px)`},{transform:'none'}],{duration:260,easing:'cubic-bezier(.2,.8,.2,1)'})})}
 /* drag to rearrange in the sidebar (off while searching or filtering) */
-const sbList=$('#list');let dg=null;
+const sbList=$('#list');let dg=null,moved=0;
 sbList.addEventListener('dragstart',e=>{if(!S.sb||q||tagF){e.preventDefault();return}
  const n=e.target.closest&&e.target.closest('summary,.row');if(!n)return;
- dg=n.matches('summary')?n.parentNode:n;e.dataTransfer.effectAllowed='move';e.dataTransfer.setData('text/plain',dg.dataset.id);requestAnimationFrame(()=>dg&&dg.classList.add('drag'))});
+ dg=n.matches('summary')?n.parentNode:n;moved=0;e.dataTransfer.effectAllowed='move';e.dataTransfer.setData('text/plain',dg.dataset.id);requestAnimationFrame(()=>dg&&dg.classList.add('drag'))});
 sbList.addEventListener('dragover',e=>{if(!dg)return;e.preventDefault();const t=e.target;
  if(dg.classList.contains('grp')){const g=t.closest('.grp');if(!g||g===dg)return;const r=g.getBoundingClientRect(),ref=e.clientY>r.top+r.height/2?g.nextElementSibling:g;
-  if(ref===dg||dg.nextElementSibling===ref)return;flipIn(sbList,'.grp',()=>sbList.insertBefore(dg,ref));return}
+  if(ref===dg||dg.nextElementSibling===ref)return;flipIn(sbList,'.grp',()=>{moved=1;sbList.insertBefore(dg,ref)});return}
  const row=t.closest('.row'),sum=t.closest('summary');let par,ref;
  if(row&&row!==dg){const r=row.getBoundingClientRect();par=row.parentNode;ref=e.clientY>r.top+r.height/2?row.nextElementSibling:row}
  else if(sum&&sum.parentNode.open){par=sum.nextElementSibling;ref=par.firstElementChild}
  else if(t===sbList){par=sbList;ref=sbList.querySelector(':scope > .grp')}
  else return;
  if(ref===dg||(dg.parentNode===par&&dg.nextElementSibling===ref))return;
- flipIn(sbList,'.row,summary',()=>par.insertBefore(dg,ref))});
+ flipIn(sbList,'.row,summary',()=>{moved=1;par.insertBefore(dg,ref)})});
 sbList.addEventListener('drop',e=>e.preventDefault());
-sbList.addEventListener('dragend',()=>{if(!dg)return;dg.classList.remove('drag');
+sbList.addEventListener('dragend',()=>{if(!dg)return;dg.classList.remove('drag');if(!moved){dg=null;return}freezeSort();
  const gs=[...sbList.querySelectorAll(':scope > .grp')],ids=gs.map(g=>g.dataset.id);
  S.folders=ids.map(id=>S.folders.find(x=>x.id===id)).filter(Boolean).concat(S.folders.filter(x=>!ids.includes(x.id)));
  const order=[],fo={},put=(r,f)=>{order.push(r.dataset.id);fo[r.dataset.id]=f};
@@ -302,8 +337,11 @@ sbList.addEventListener('dragend',()=>{if(!dg)return;dg.classList.remove('drag')
  S.items=order.map(id=>by[id]).filter(Boolean).concat(S.items.filter(i=>!(i.id in fo)));
  S.items.forEach(i=>{if(i.id in fo)i.folder=fo[i.id]});
  dg=null;save();render()});
-const deskIds=()=>{const all=[...S.folders.map(f=>f.id),...S.items.filter(i=>i.pin).map(i=>i.id)],o=(S.desk||[]).filter(id=>all.includes(id));return[...o,...all.filter(id=>!o.includes(id))]};
-const desk=$('#desk');
+const deskIds=()=>{const all=[...S.folders.map(f=>f.id),...S.items.filter(i=>i.pin).map(i=>i.id)];
+ if(S.sort!=='custom'){const h=hs(),m=new Map();S.folders.forEach(f=>m.set(f.id,{id:f.id,name:f.name,f}));S.items.forEach(i=>{if(i.pin)m.set(i.id,{id:i.id,name:i.name,i})});
+  return sortBy([...m.values()],o=>o.f?folderScore(o.f,h):itemScore(o.i,h),h).map(o=>o.id)}
+ const o=(S.desk||[]).filter(id=>all.includes(id));return[...o,...all.filter(id=>!o.includes(id))]};
+const desk=$('#desk');let dm=0;
 function flip(fn){const p={};desk.querySelectorAll('[data-id]').forEach(n=>p[n.dataset.id]=n.getBoundingClientRect());fn();
  if(RM)return;desk.querySelectorAll('[data-id]').forEach(n=>{const o=p[n.dataset.id];if(!o)return;const r=n.getBoundingClientRect(),dx=o.left-r.left,dy=o.top-r.top;
   if(dx||dy)n.animate([{transform:`translate(${dx}px,${dy}px)`},{transform:'none'}],{duration:300,easing:'cubic-bezier(.2,.8,.2,1)'})})}
@@ -314,12 +352,12 @@ function renderDesk(){flip(()=>{desk.replaceChildren();
   n.draggable=true;desk.append(n)});
  if(!desk.children.length)desk.append(el('p','hint','Right-click the page to add shortcuts or folders.'))})}
 /* drag to rearrange */
-desk.addEventListener('dragstart',e=>{const n=e.target.closest('[data-id]');if(!n)return;e.dataTransfer.effectAllowed='move';e.dataTransfer.setData('text/plain',n.dataset.id);requestAnimationFrame(()=>n.classList.add('drag'))});
+desk.addEventListener('dragstart',e=>{const n=e.target.closest('[data-id]');if(!n)return;dm=0;e.dataTransfer.effectAllowed='move';e.dataTransfer.setData('text/plain',n.dataset.id);requestAnimationFrame(()=>n.classList.add('drag'))});
 desk.addEventListener('dragover',e=>{const d=desk.querySelector('.drag');if(!d)return;e.preventDefault();
  const n=e.target.closest('[data-id]');if(!n||n===d)return;const r=n.getBoundingClientRect(),ref=e.clientX>r.left+r.width/2?n.nextSibling:n;
- if(ref===d||d.nextSibling===ref)return;flip(()=>desk.insertBefore(d,ref))});
+ if(ref===d||d.nextSibling===ref)return;flip(()=>{dm=1;desk.insertBefore(d,ref)})});
 desk.addEventListener('drop',e=>e.preventDefault());
-desk.addEventListener('dragend',()=>{desk.querySelectorAll('.drag').forEach(n=>n.classList.remove('drag'));S.desk=[...desk.querySelectorAll('[data-id]')].map(n=>n.dataset.id);save()});
+desk.addEventListener('dragend',()=>{desk.querySelectorAll('.drag').forEach(n=>n.classList.remove('drag'));if(!dm)return;const was=S.sort;freezeSort();S.desk=[...desk.querySelectorAll('[data-id]')].map(n=>n.dataset.id);save();if(was!=='custom')render()});
 /* folder windows */
 const wins={};let zi=10;
 function openWin(id){if(!wins[id]){const n=Object.keys(wins).length;wins[id]={x:Math.max(12,Math.min(360+n*28,innerWidth-460)),y:110+n*28,fresh:1}}wins[id].z=++zi;renderWins()}
@@ -338,12 +376,12 @@ function renderWins(){const W=$('#wins');W.replaceChildren();
   w.append(h,b);W.append(w)}}
 /* menus */
 const ctx=$('#ctx');
-function menu(x,y,items){ctx.replaceChildren(...items.map(([t,f,dg])=>{const b=el('button',dg?'dg':'',t);b.onclick=()=>{ctx.hidden=true;f()};return b}));
+function menu(x,y,items){const ck=items.some(i=>i.length>3);ctx.replaceChildren(...items.map(([t,f,dg,on])=>{const b=el('button',(dg?'dg ':'')+(ck?'ck'+(on?' on':''):''),t);b.onclick=()=>{ctx.hidden=true;f()};return b}));
  ctx.hidden=false;const r=ctx.getBoundingClientRect();ctx.style.left=Math.min(x,innerWidth-r.width-8)+'px';ctx.style.top=Math.min(y,innerHeight-r.height-8)+'px'}
 addEventListener('contextmenu',e=>{if(e.target.closest('dialog,input,#ctx'))return;e.preventDefault();
  const n=e.target.closest('[data-t]'),x=e.clientX,y=e.clientY;
  if(n&&n.dataset.t==='i'){const it=S.items.find(i=>i.id===n.dataset.id);
-  menu(x,y,[['Open in new tab',()=>open(norm(it.url),'_blank')],['Edit',()=>itemDlg(it.id)],[it.pin?'Unpin from desktop':'Pin to desktop',()=>{it.pin=!it.pin;save();render()}],['Delete',()=>{if(confirm('Delete “'+it.name+'”?')){S.items=S.items.filter(i=>i!==it);save();render()}},1]])}
+  menu(x,y,[['Open in new tab',()=>{hit(it.id);open(norm(it.url),'_blank')}],['Edit',()=>itemDlg(it.id)],[it.pin?'Unpin from desktop':'Pin to desktop',()=>{it.pin=!it.pin;save();render()}],['Delete',()=>{if(confirm('Delete “'+it.name+'”?')){S.items=S.items.filter(i=>i!==it);{const h=getHits();delete h[it.id];setHits(h)}save();render()}},1]])}
  else if(n){const f=S.folders.find(i=>i.id===n.dataset.id);
   menu(x,y,[['Open',()=>openWin(f.id)],['Add shortcut here',()=>itemDlg(null,f.id)],['Edit folder',()=>folderDlg(f.id)],['Delete folder',()=>{if(confirm('Delete folder “'+f.name+'”? Its shortcuts move out of the folder.')){S.items.forEach(i=>{if(i.folder===f.id)i.folder=''});S.folders=S.folders.filter(i=>i!==f);save();render()}},1]])}
  else menu(x,y,[['New shortcut',()=>itemDlg()],['New folder',()=>folderDlg()],['Manage tags',tagsDlg],['Appearance',appearance],['Settings',settings]])});
@@ -352,6 +390,11 @@ addEventListener('keydown',e=>{if(e.key==='Escape')ctx.hidden=true;
  if(e.key==='/'&&!e.target.closest('input,select,dialog')){e.preventDefault();document.querySelector('#sf input').focus()}});
 $('#tog').onclick=()=>{S.sb=!S.sb;save();applyTheme();renderSide()};
 $('#add').onclick=()=>itemDlg();
+$('#sort').onclick=e=>{e.stopPropagation();const r=e.currentTarget.getBoundingClientRect();
+ menu(S.sb?r.left:r.right+8,S.sb?r.bottom+6:r.top,Object.entries(SORTS).map(([k,t])=>[t,()=>{S.sort=k;save();render()},0,S.sort===k]))};
+addEventListener('click',e=>{const a=e.target.closest&&e.target.closest('a[data-t="i"]');if(a&&e.button===0)hit(a.dataset.id)});
+addEventListener('auxclick',e=>{const a=e.target.closest&&e.target.closest('a[data-t="i"]');if(a&&e.button===1)hit(a.dataset.id)});
+document.addEventListener('visibilitychange',()=>{if(document.hidden)return;if(dirty&&S.sort==='freq')render();dirty=0});
 $('#gear').onclick=settings;$('#look').onclick=appearance;
 $('#q').oninput=e=>{q=e.target.value.trim().toLowerCase();renderSide()};
 function dots(cur,presets,pick){const w=el('div','dots');
@@ -432,16 +475,22 @@ function settings(){const box=el('div');
  const tgl=(label,desc,val,fn)=>{const l=el('label','tgl'),t=el('div'),i=el('input');t.append(el('b','',label),el('span','',desc));i.type='checkbox';i.checked=val;i.onchange=()=>fn(i.checked);l.append(t,i,el('i','knob'));return l};
  const tg=el('div','rw');tg.append(mk('Manage tags',tagsDlg));
  const dr=el('div','rw'),rs=mk('Reset',resetAll);rs.classList.add('danger');dr.append(mk('Export backup',exportData),mk('Import backup',importData),rs);
- box.append(sec('Desktop',tgl('Center shortcuts','Center the icons on the desktop instead of aligning them to the left.',!!S.center,v=>{S.center=v;save();flip(applyTheme)})),
+ const ub=el('div'),usage=()=>{const h=getHits(),rows=[...S.items].sort((a,b)=>(h[b.id]||0)-(h[a.id]||0)||cmpN(a,b)),tot=rows.reduce((n,i)=>n+(h[i.id]||0),0),lst=el('div','ulist');
+  rows.forEach(i=>{const r=el('div','ur');r.append(tile(i),el('span','nm',i.name),el('span','c',String(h[i.id]||0)));lst.append(r)});
+  const rs2=mk('Reset counts',()=>{if(confirm('Reset all open counts to zero?')){setHits({});dirty=0;usage();render()}});rs2.classList.add('danger');rs2.disabled=!tot;
+  const row=el('div','rw');row.append(rs2);
+  ub.replaceChildren(el('div','lab','Times you’ve opened each shortcut ('+tot+' in total). These counts power “Most used” sorting and are saved in this browser only.'),...(rows.length?[lst]:[]),row)};usage();
+ box.append(sec('Desktop',tgl('Center shortcuts','Center the icons on the desktop instead of aligning them to the left.',!!S.center,v=>{S.center=v;save();flip(applyTheme)}),tgl('Round icon corners','Rounds the icon corners and keeps a white margin around your own uploaded or linked images. Turn off for sharp corners with edge-to-edge images.',S.round!==false,v=>{S.round=v;save();applyTheme()})),
   sec('Tags',el('div','lab','Rename, merge or delete the tags on your shortcuts.'),tg),
+  sec('Usage',ub),
   sec('Import & export',dr,el('p','note','Everything is saved in this browser only. Export a backup to move it to another computer. Reset returns the page to its defaults.')));
  modal('Settings',[box],null)}
-function resetAll(){if(!confirm('Reset everything to the defaults? This deletes all shortcuts, folders, tags and appearance settings. Export a backup first if you want to keep them.'))return;S=seed();save();applyTheme();render();dlg.close()}
-function exportData(){const a=el('a');a.href=URL.createObjectURL(new Blob([JSON.stringify(S,null,1)],{type:'application/json'}));a.download='startpage-backup-'+new Date().toISOString().slice(0,10)+'.json';a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1500)}
+function resetAll(){if(!confirm('Reset everything to the defaults? This deletes all shortcuts, folders, tags, open counts and appearance settings. Export a backup first if you want to keep them.'))return;S=seed();setHits({});save();applyTheme();render();dlg.close()}
+function exportData(){const a=el('a');a.href=URL.createObjectURL(new Blob([JSON.stringify({...S,hits:getHits()},null,1)],{type:'application/json'}));a.download='startpage-backup-'+new Date().toISOString().slice(0,10)+'.json';a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1500)}
 function importData(){const f=el('input');f.type='file';f.accept='.json,application/json';
  f.onchange=async()=>{try{const d=JSON.parse(await f.files[0].text());if(!Array.isArray(d.items))throw 0;
   if(!confirm('Replace everything on this page with the backup?'))return;
-  S={...seed(),...d,folders:Array.isArray(d.folders)?d.folders:[]};if(save()){applyTheme();render()}}catch(e){alert('That file isn’t a valid backup.')}};f.click()}
+  S={...seed(),...d,folders:Array.isArray(d.folders)?d.folders:[]};delete S.hits;setHits(d.hits&&typeof d.hits==='object'?d.hits:{});if(!SORTS[S.sort])S.sort='custom';if(save()){applyTheme();render()}}catch(e){alert('That file isn’t a valid backup.')}};f.click()}
 function tick(){const d=new Date();$('#ck').textContent=d.toLocaleTimeString([],{hour:'numeric',minute:'2-digit'});$('#cd').textContent=d.toLocaleDateString([],{weekday:'long',month:'long',day:'numeric'})}
 tick();setInterval(tick,10000);applyTheme();render();
 </script>
