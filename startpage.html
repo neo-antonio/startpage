@@ -34,12 +34,12 @@ body.rail #tog svg{transform:rotate(180deg)}
 .row{display:flex;align-items:center;gap:11px;padding:6px 8px;border-radius:10px;color:var(--text);text-decoration:none;transition:background .15s}
 .row:hover{background:var(--hover)}
 .row .tile{width:28px;height:28px;font-size:13px;border-radius:8px;margin:0;flex:none;box-shadow:none;transition:width .3s var(--ease),height .3s var(--ease)}
-.nm{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.nm{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.tx{flex:1;min-width:0;display:flex;flex-direction:column}.tx .nm{flex:none}.ds{color:var(--dim);font-size:12px;line-height:1.35;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .tag{font-size:11px;padding:1px 8px;border-radius:9px;background:var(--hover);color:var(--dim)}
 .grp summary{cursor:pointer;display:flex;align-items:center;gap:11px;padding:6px 8px;border-radius:10px;font-weight:600;list-style:none;user-select:none;transition:background .15s}.grp summary::-webkit-details-marker{display:none}.grp summary:hover{background:var(--hover)}.grp summary::after{content:'';width:7px;height:7px;border-right:2px solid var(--dim);border-bottom:2px solid var(--dim);transform:rotate(45deg);margin:0 4px 3px 2px;transition:transform .3s var(--ease)}.grp.closed summary::after{transform:rotate(-45deg);margin-bottom:0}.cnt{color:var(--dim);font-weight:500;font-size:12px}.gc{overflow:hidden}.row.drag,.grp.drag{opacity:.4}
 .grp .row{margin-left:14px}
 hr{border:0;border-top:1px solid var(--line);margin:8px 10px}
-body.rail #q,body.rail #tags,body.rail .sh span,body.rail .nm,body.rail .tag,body.rail .gl{display:none}
+body.rail #q,body.rail #tags,body.rail .sh span,body.rail .tx,body.rail .nm,body.rail .tag,body.rail .gl{display:none}
 body.rail .sh{flex-direction:column;padding:14px 0 6px;gap:4px;align-items:center}
 body.rail .row{justify-content:center;padding:5px 0}
 body.rail .row .tile{width:42px;height:42px;border-radius:13px;font-size:17px}
@@ -147,6 +147,13 @@ body.ctr #desk{display:flex;flex-wrap:wrap;justify-content:center}
 .knob::after{content:'';position:absolute;top:3px;left:3px;width:18px;height:18px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.3);transition:transform .25s var(--ease)}
 .tgl input:checked~.knob{background:var(--accent)}.tgl input:checked~.knob::after{transform:translateX(18px)}
 .tgl input:focus-visible~.knob{outline:2px solid var(--accent);outline-offset:2px}
+.bfx{margin-top:10px;display:grid;gap:10px;padding:12px;border:1px solid var(--line);border-radius:14px}
+.bfx .lab{margin:0}
+.bres{max-height:196px;overflow:auto;padding:2px}
+.bres .ib2 img{width:26px;height:26px;object-fit:contain}
+.seg{display:inline-flex;justify-self:start;background:var(--hover);border-radius:10px;padding:3px}
+.seg button{border:0;background:none;color:var(--dim);padding:5px 14px;border-radius:8px;transition:all .2s}
+.seg .on{background:var(--pop);color:var(--text);box-shadow:0 1px 3px rgba(16,24,40,.14)}
 @media(prefers-reduced-motion:reduce){*,::backdrop{animation:none!important;transition:none!important}}
 </style>
 </head>
@@ -240,7 +247,7 @@ const hue=s=>{let h=0;for(const c of s)h=(h*31+c.charCodeAt(0))%360;return`hsl($
 function tile(it){const d=el('div','tile');
  const letter=()=>{d.className='tile';d.replaceChildren();d.textContent=(it.name||'?')[0].toUpperCase();d.style.background=hue(it.name||'?')};
  const h=host(it.url),src=it.img||(h&&'https://www.google.com/s2/favicons?sz=128&domain='+h);
- if(src){d.classList.add('has',it.img?'cus':'fav');const i=new Image();i.alt='';i.draggable=false;i.onerror=letter;i.src=src;d.append(i)}else letter();return d}
+ if(src){d.classList.add('has',it.img&&!/^https:\/\/api\.iconify\.design\//.test(it.img)?'cus':'fav');const i=new Image();i.alt='';i.draggable=false;i.onerror=letter;i.src=src;d.append(i)}else letter();return d}
 const byFolder=id=>S.items.filter(i=>(i.folder||'')===id);
 const folderTile=f=>{const d=el('div','tile fold');d.innerHTML=glyph(f.icon||'folder');return d};
 const link=(it,c)=>{const a=el('a',c);a.href=norm(it.url);a.target='_blank';a.rel='noopener';a.dataset.t='i';a.dataset.id=it.id;return a};
@@ -250,9 +257,9 @@ function renderSide(){
  const rail=!S.sb,tags=[...new Set(S.items.map(i=>i.tag).filter(Boolean))].sort();
  if(tagF&&!tags.includes(tagF))tagF='';
  $('#tags').replaceChildren(...tags.map(t=>{const b=el('button','chip'+(t===tagF?' on':''),t);b.onclick=()=>{tagF=tagF===t?'':t;renderSide()};return b}));
- const can=!rail&&!q&&!tagF,ok=i=>rail||((!tagF||i.tag===tagF)&&(!q||(i.name+' '+i.url+' '+i.tag).toLowerCase().includes(q)));
+ const can=!rail&&!q&&!tagF,ok=i=>rail||((!tagF||i.tag===tagF)&&(!q||(i.name+' '+i.url+' '+i.tag+' '+(i.desc||'')).toLowerCase().includes(q)));
  const list=$('#list');list.replaceChildren();
- const row=i=>{const a=link(i,'row');a.title=i.name;a.draggable=can;a.append(tile(i),el('span','nm',i.name));if(i.tag)a.append(el('span','tag',i.tag));return a};
+ const row=i=>{const a=link(i,'row');a.title=i.name+(i.desc?' — '+i.desc:'');a.draggable=can;const tx=el('span','tx');tx.append(el('span','nm',i.name));if(i.desc)tx.append(el('span','ds',i.desc));a.append(tile(i),tx);if(i.tag)a.append(el('span','tag',i.tag));return a};
  byFolder('').filter(ok).forEach(i=>list.append(row(i)));
  S.folders.forEach(f=>{const its=byFolder(f.id).filter(ok);
   if(rail){if(its.length){list.append(el('hr'));its.forEach(i=>list.append(row(i)))}return}
@@ -354,6 +361,20 @@ function dots(cur,presets,pick){const w=el('div','dots');
  draw();return w}
 function upload(label,cb){const l=el('label','up'),i=el('input');i.type='file';i.accept='image/*';i.onchange=()=>{if(i.files[0])cb(i.files[0]);i.value=''};
  const g=el('span');g.style.display='inline-flex';g.innerHTML='<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 16V5m0 0L8 9m4-4 4 4M5 19h14"/></svg>';l.append(g,label,i);return l}
+function brandFinder(it,name,iu,drawPv){
+ const box=el('div','bfx'),q2=inp('','Search brands, e.g. github'),res=el('div','ig bres'),msg=el('div','lab'),seg=el('div','seg');box.hidden=true;
+ let set='logos',tk=0;
+ const go=async()=>{const v=q2.value.trim();if(!v)return;const my=++tk;msg.textContent='Searching…';res.replaceChildren();
+  try{const r=await fetch('https://api.iconify.design/search?limit=40&prefix='+set+'&query='+encodeURIComponent(v));if(!r.ok)throw 0;const d=await r.json();if(my!==tk)return;
+   const ic=d.icons||[];msg.textContent=ic.length?'Click a logo to use it.':'No matches. Try a shorter name.';
+   res.replaceChildren(...ic.map(n=>{const[pf,nm]=n.split(':'),u='https://api.iconify.design/'+pf+'/'+nm+'.svg',b=el('button','ib2'),i=new Image();
+    i.src=u;i.alt='';i.loading='lazy';b.type='button';b.title=nm;b.append(i);b.onclick=()=>{it.img=u;iu.value=u;drawPv()};return b}))}
+  catch(e){if(my===tk)msg.textContent='Couldn’t reach the Iconify catalog. Check your connection, or paste an image link above.'}};
+ [['logos','Color'],['simple-icons','Mono']].forEach(([k,t])=>{const b=el('button',k===set?'on':'',t);b.type='button';b.onclick=()=>{set=k;seg.querySelectorAll('button').forEach(x=>x.className=x===b?'on':'');go()};seg.append(b)});
+ const sb=mk('Search',go),top=el('div','rw');q2.style.flex='1';q2.onkeydown=e=>{if(e.key==='Enter'){e.preventDefault();go()}};top.append(q2,sb);
+ box.append(top,seg,msg,res);
+ const btn=mk('Find brand icon',()=>{box.hidden=!box.hidden;if(!box.hidden){if(!q2.value)q2.value=name.value.trim();q2.focus();if(q2.value&&!res.children.length)go()}});
+ return{btn,box}}
 function folderDlg(id){const old=id&&S.folders.find(f=>f.id===id),f={...(old||{id:uid(),name:''})};f.icon=f.icon||'folder';f.color=f.color||'';
  const name=inp(f.name,'Folder name');name.required=true;
  const pv=el('div'),ig=el('div','ig'),top=el('div','pvr');top.append(pv,fld('Name',name));
@@ -377,7 +398,7 @@ function modal(title,body,onOk,okText='Save'){dlg.replaceChildren();const f=el('
 const imgData=(f,max,type='image/webp',qq=.9)=>new Promise((res,rej)=>{const r=new FileReader();r.onload=()=>{const i=new Image();i.onload=()=>{const k=Math.min(1,max/Math.max(i.width,i.height));const c=document.createElement('canvas');c.width=Math.round(i.width*k);c.height=Math.round(i.height*k);c.getContext('2d').drawImage(i,0,0,c.width,c.height);res(c.toDataURL(type,qq))};i.onerror=rej;i.src=r.result};r.onerror=rej;r.readAsDataURL(f)});
 function itemDlg(id,folder=''){const old=id&&S.items.find(i=>i.id===id);
  const it=old?{...old}:{id:uid(),name:'',url:'',tag:'',folder,pin:false,img:''};
- const name=inp(it.name,'Gmail'),url=inp(it.url,'https://…'),tag=inp(it.tag,'e.g. work');name.required=url.required=true;
+ const name=inp(it.name,'Gmail'),url=inp(it.url,'https://…'),tag=inp(it.tag,'e.g. work'),desc=inp(it.desc,'What is this for? (optional)');desc.maxLength=160;name.required=url.required=true;
  tag.setAttribute('list','taglist');const dl=el('datalist');dl.id='taglist';[...new Set(S.items.map(i=>i.tag).filter(Boolean))].forEach(t=>{const o=el('option');o.value=t;dl.append(o)});
  const sel=el('select');[['','No folder']].concat(S.folders.map(f=>[f.id,f.name])).forEach(([v,t])=>{const o=el('option','',t);o.value=v;sel.append(o)});sel.value=it.folder;
  const pin=el('input');pin.type='checkbox';pin.checked=it.pin;const pl=el('label','rw');pl.append(pin,'Show on desktop');
@@ -387,11 +408,11 @@ function itemDlg(id,folder=''){const old=id&&S.items.find(i=>i.id===id);
  iu.onchange=()=>{it.img=iu.value.trim();drawPv()};name.onchange=url.onchange=drawPv;
  const rm=el('button','btn','Use site icon');rm.type='button';rm.onclick=()=>{it.img='';iu.value='';drawPv()};
  drawPv();
- const acts=el('div','rw');acts.append(up,rm);const prow=el('div','pvr');prow.append(pv,acts);
- const imgBox=el('div','fld');imgBox.append(el('span','','Icon image'),prow,iu);
- modal(old?'Edit shortcut':'New shortcut',[fld('Name',name),fld('Address',url),fld('Tag',tag),dl,fld('Folder',sel),pl,imgBox],()=>{
+ const bfd=brandFinder(it,name,iu,drawPv),acts=el('div','rw');acts.append(up,rm,bfd.btn);const prow=el('div','pvr');prow.append(pv,acts);
+ const imgBox=el('div','fld');imgBox.append(el('span','','Icon image'),prow,iu,bfd.box);
+ modal(old?'Edit shortcut':'New shortcut',[fld('Name',name),fld('Address',url),fld('Description',desc),fld('Tag',tag),dl,fld('Folder',sel),pl,imgBox],()=>{
   const img=iu.value.trim()||(it.img.startsWith('data:')?it.img:'');
-  Object.assign(it,{name:name.value.trim(),url:url.value.trim(),tag:tag.value.trim(),folder:sel.value,pin:pin.checked,img});
+  Object.assign(it,{name:name.value.trim(),desc:desc.value.trim(),url:url.value.trim(),tag:tag.value.trim(),folder:sel.value,pin:pin.checked,img});
   if(old)Object.assign(old,it);else S.items.push(it);save();render()})}
 const sec=(h,...n)=>{const d=el('div','sec');d.append(el('h3','',h),...n);return d};
 const mk=(t,fn)=>{const b=el('button','btn',t);b.type='button';b.onclick=fn;return b};
