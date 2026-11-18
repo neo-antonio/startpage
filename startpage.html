@@ -30,7 +30,11 @@ body.rail #tog svg{transform:rotate(180deg)}
 .chip{border:1px solid var(--line);background:none;color:var(--dim);border-radius:14px;padding:1px 10px;font-size:12px;transition:all .18s}
 .chip:hover{color:var(--text)}
 .chip.on{background:var(--accent);color:var(--onacc);border-color:var(--accent)}
-#list{overflow:auto;padding:2px 8px 10px;flex:1;scrollbar-width:thin}
+#list{overflow:auto;padding:2px 8px 10px;flex:1;scrollbar-width:thin;scrollbar-color:transparent transparent}
+#list.scrolling{scrollbar-color:var(--dim) transparent}
+#list::-webkit-scrollbar{width:8px}
+#list::-webkit-scrollbar-thumb{background:transparent;border-radius:4px}
+#list.scrolling::-webkit-scrollbar-thumb{background:var(--dim)}
 .row{display:flex;align-items:center;gap:11px;padding:6px 8px;border-radius:10px;color:var(--text);text-decoration:none;transition:background .15s}
 .row:hover{background:var(--hover)}
 .row .tile{width:28px;height:28px;font-size:13px;border-radius:8px;margin:0;flex:none;box-shadow:none;transition:width .3s var(--ease),height .3s var(--ease)}
@@ -71,6 +75,10 @@ body.img #desk .ico span{background:rgba(0,0,0,.4);color:#fff}
 .tile.fav img{width:64%;height:64%;object-fit:contain;border-radius:24%}
 .tile.cus img{width:100%;height:100%;object-fit:cover}
 .tile.fold{background:#fff;color:#111;box-shadow:0 0 0 1px rgba(16,24,40,.1),0 2px 8px rgba(16,24,40,.1)}.tile.fold svg{width:28px;height:28px;stroke-width:1.6}
+.tile.qs{position:relative}.tile.qs::after{content:'';position:absolute;right:5px;bottom:5px;width:15px;height:15px;border-radius:50%;background:var(--accent) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M13 2 4 14h7l-1 8 9-12h-7z' fill='white'/%3E%3C/svg%3E") center/9px no-repeat}
+.wh .la{padding:4px 12px;font-size:13px;font-weight:600;background:var(--accent);color:var(--onacc);border-color:var(--accent);margin-right:4px}.wh .la:hover{background:var(--accent);filter:brightness(1.08)}
+.wh .hr{display:flex;align-items:center}
+.qpick{max-height:230px;overflow:auto;margin:0 -4px 6px;padding:0 4px}.qpick label{display:flex;align-items:center;gap:10px;padding:5px 0;cursor:pointer}.qpick .nm{flex:1}
 .tile.sm{width:26px;height:26px;border-radius:8px;margin:0;box-shadow:none;flex:none}.tile.sm svg{width:15px;height:15px}
 #wins{position:fixed;inset:0;z-index:20;pointer-events:none}
 .win{pointer-events:auto;position:fixed;width:min(440px,92vw);max-height:62vh;display:flex;flex-direction:column;background:var(--pop);border:1px solid var(--line);border-radius:18px;box-shadow:0 20px 60px rgba(16,24,40,.22);overflow:hidden}
@@ -165,6 +173,18 @@ body.ctr #desk{display:flex;flex-wrap:wrap;justify-content:center}
 .ur .c{color:var(--dim);font-size:13px;font-variant-numeric:tabular-nums}
 body.rnd .tile,body.rnd.rail .row .tile{border-radius:30%}
 body:not(.rnd) .tile,body:not(.rnd).rail .row .tile{border-radius:8%}
+.szc{background:var(--hover);border-radius:14px;padding:11px 14px 12px;display:grid;gap:6px;margin:12px 0}.szc[hidden]{display:none}
+.szh{display:flex;align-items:center;gap:8px}.szh b{flex:1;font-weight:600;font-size:13px}
+.szh .v{font-size:12px;font-variant-numeric:tabular-nums;color:var(--text);background:var(--pop);border:1px solid var(--line);border-radius:8px;padding:1px 9px;min-width:46px;text-align:center}
+.szh .rs{border:0;background:none;color:var(--accent);font-size:12.5px;font-weight:600;padding:2px 6px;border-radius:6px;transition:opacity .2s,background .2s}.szh .rs:hover:not(:disabled){background:color-mix(in srgb,var(--accent) 12%,transparent)}.szh .rs:disabled{opacity:.35;cursor:default}
+.szr{display:flex;align-items:center;gap:10px;color:var(--dim)}.szr span{display:grid;place-items:center;flex:none}
+dialog input.sl[type=range]:not([hidden]),dialog input.sl[type=range]:focus{-webkit-appearance:none;appearance:none;flex:1;min-width:0;height:22px;padding:0;margin:0;border:0;border-radius:0;background:transparent;cursor:pointer}
+.sl::-webkit-slider-runnable-track{height:6px;border-radius:3px;background:linear-gradient(to right,var(--accent) var(--p,50%),color-mix(in srgb,var(--text) 16%,transparent) var(--p,50%))}
+.sl::-moz-range-track{height:6px;border-radius:3px;background:linear-gradient(to right,var(--accent) var(--p,50%),color-mix(in srgb,var(--text) 16%,transparent) var(--p,50%))}
+.sl::-webkit-slider-thumb{-webkit-appearance:none;width:18px;height:18px;margin-top:-6px;border-radius:50%;background:#fff;border:2px solid var(--accent);box-shadow:0 1px 4px rgba(16,24,40,.28);transition:transform .15s var(--ease),box-shadow .15s}
+.sl::-moz-range-thumb{width:14px;height:14px;border-radius:50%;background:#fff;border:2px solid var(--accent);box-shadow:0 1px 4px rgba(16,24,40,.28);transition:transform .15s}
+.sl:hover::-webkit-slider-thumb,.sl:active::-webkit-slider-thumb{transform:scale(1.12)}.sl:hover::-moz-range-thumb,.sl:active::-moz-range-thumb{transform:scale(1.12)}
+.sl:focus-visible::-webkit-slider-thumb{box-shadow:0 0 0 4px color-mix(in srgb,var(--accent) 25%,transparent)}.sl:focus-visible::-moz-range-thumb{box-shadow:0 0 0 4px color-mix(in srgb,var(--accent) 25%,transparent)}
 body.rnd .tile.cus img{width:78%;height:78%;border-radius:24%}
 .sec .tgl+.tgl{margin-top:14px}
 @media(prefers-reduced-motion:reduce){*,::backdrop{animation:none!important;transition:none!important}}
@@ -213,6 +233,7 @@ const THEMES={
  midnight:{n:'Midnight',bg:'linear-gradient(160deg,#0b0c1a,#221a4d)',acc:'#a78bfa',panel:'rgba(28,24,60,.72)',pop:'#1e1a40',...DK}
 };
 const ICONS={
+bolt:'<path d="M13 3 5 14h6l-1 7 8-11h-6z"/>',
 folder:'<path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>',
 work:'<rect x="3" y="7" width="18" height="13" rx="2"/><path d="M9 7V5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2M3 13h18"/>',
 code:'<path d="m8 8-5 4 5 4M16 8l5 4-5 4M14 5l-4 14"/>',
@@ -240,7 +261,7 @@ star:'<path d="m12 3 2.700 5.600 6.100.9-4.400 4.300 1 6.100L12 17l-5.400 2.900 
 const COLORS=['#2f6bff','#7c5cff','#e8436e','#f97316','#eab308','#16a34a','#0891b2','#64748b'];
 const BGS=['','#ffffff','#eef2f7','#fdf0e3','#e6f4ec','#e8e4f8','#1b1f2a'];
 const glyph=k=>`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">${ICONS[k]||ICONS.folder}</svg>`;
-const seed=()=>({v:2,theme:'light',accent:'',bgc:'',bgi:'',sb:true,closed:[],desk:[],folders:[{id:'f1',name:'Work',icon:'work',color:'#7c5cff'}],items:[
+const seed=()=>({v:2,theme:'light',accent:'',bgc:'',bgi:'',sb:true,closed:[],desk:[],quick:[],folders:[{id:'f1',name:'Work',icon:'work',color:'#7c5cff'}],items:[
  {id:uid(),name:'Gmail',url:'https://mail.google.com',tag:'mail',folder:'',pin:true,img:''},
  {id:uid(),name:'YouTube',url:'https://www.youtube.com',tag:'media',folder:'',pin:true,img:''},
  {id:uid(),name:'Maps',url:'https://maps.google.com',tag:'tools',folder:'',pin:false,img:''},
@@ -248,6 +269,7 @@ const seed=()=>({v:2,theme:'light',accent:'',bgc:'',bgi:'',sb:true,closed:[],des
  {id:uid(),name:'Calendar',url:'https://calendar.google.com',tag:'work',folder:'f1',pin:false,img:''}]});
 let S;try{S=JSON.parse(localStorage.getItem(KEY))}catch(e){}
 if(!S||!Array.isArray(S.items))S=seed();
+if(!Array.isArray(S.quick))S.quick=[];
 const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(S));return true}catch(e){alert('Couldn’t save: browser storage is full. Try a smaller background or icon image.');return false}};
 const lum=h=>{const n=parseInt(h.slice(1),16);return(.299*(n>>16)+.587*(n>>8&255)+.114*(n&255))/255};
 function applyTheme(){const t=THEMES[S.theme]||THEMES.light,r=document.documentElement.style,acc=S.accent||t.acc;
@@ -261,7 +283,8 @@ const hue=s=>{let h=0;for(const c of s)h=(h*31+c.charCodeAt(0))%360;return`hsl($
 function tile(it){const d=el('div','tile');
  const letter=()=>{d.className='tile';d.replaceChildren();d.textContent=(it.name||'?')[0].toUpperCase();d.style.background=hue(it.name||'?')};
  const h=host(it.url),src=it.img||(h&&'https://www.google.com/s2/favicons?sz=128&domain='+h);
- if(src){d.classList.add('has',it.img&&!/^https:\/\/api\.iconify\.design\//.test(it.img)?'cus':'fav');const i=new Image();i.alt='';i.draggable=false;i.onerror=letter;i.src=src;d.append(i)}else letter();return d}
+ if(src){d.classList.add('has',it.img&&!/^https:\/\/api\.iconify\.design\//.test(it.img)?'cus':'fav');const i=new Image();i.alt='';i.draggable=false;i.onerror=letter;i.src=src;if(it.img&&it.scale){i.style.width=i.style.height=it.scale+'%';i.style.objectFit='contain'}d.append(i)}else letter();return d}
+const defScale=it=>/^https:\/\/api\.iconify\.design\//.test(it.img||'')?64:(S.round!==false?78:100);
 const HK='startpage.v1.hits';
 const getHits=()=>{try{const h=JSON.parse(localStorage.getItem(HK));return h&&typeof h==='object'?h:{}}catch(e){return{}}};
 const setHits=h=>{try{localStorage.setItem(HK,JSON.stringify(h))}catch(e){}};
@@ -284,6 +307,11 @@ function freezeSort(){if(S.sort==='custom')return;
  const fs=sortedFolders(),out=[...byFolder('')];fs.forEach(f=>out.push(...byFolder(f.id)));const d=deskIds();
  S.folders=fs;S.items=out.concat(S.items.filter(i=>!out.includes(i)));S.desk=d;S.sort='custom'}
 function syncSort(){const b=$('#sort');b.classList.toggle('act',S.sort!=='custom');b.title='Sort: '+SORTS[S.sort]}
+const quickItems=q=>(q.items||[]).map(id=>S.items.find(i=>i.id===id)).filter(Boolean);
+const quickTile=q=>{const d=folderTile(q);d.classList.add('qs');return d};
+function launchQuick(q){const its=quickItems(q);if(!its.length){alert('This quick start has no shortcuts yet.');return}
+ let blocked=0;its.forEach(i=>{hit(i.id);const w=open(norm(i.url),'_blank');if(w)w.opener=null;else blocked++});
+ if(blocked)alert('Your browser blocked '+blocked+' of '+its.length+' tabs. Allow pop-ups for this page, then launch again.')}
 const folderTile=f=>{const d=el('div','tile fold');d.innerHTML=glyph(f.icon||'folder');return d};
 const link=(it,c)=>{const a=el('a',c);a.href=norm(it.url);a.target='_blank';a.rel='noopener';a.dataset.t='i';a.dataset.id=it.id;return a};
 let tagF='',q='';
@@ -337,20 +365,21 @@ sbList.addEventListener('dragend',()=>{if(!dg)return;dg.classList.remove('drag')
  S.items=order.map(id=>by[id]).filter(Boolean).concat(S.items.filter(i=>!(i.id in fo)));
  S.items.forEach(i=>{if(i.id in fo)i.folder=fo[i.id]});
  dg=null;save();render()});
-const deskIds=()=>{const all=[...S.folders.map(f=>f.id),...S.items.filter(i=>i.pin).map(i=>i.id)];
- if(S.sort!=='custom'){const h=hs(),m=new Map();S.folders.forEach(f=>m.set(f.id,{id:f.id,name:f.name,f}));S.items.forEach(i=>{if(i.pin)m.set(i.id,{id:i.id,name:i.name,i})});
-  return sortBy([...m.values()],o=>o.f?folderScore(o.f,h):itemScore(o.i,h),h).map(o=>o.id)}
+const deskIds=()=>{const all=[...S.folders.map(f=>f.id),...S.quick.map(q=>q.id),...S.items.filter(i=>i.pin).map(i=>i.id)];
+ if(S.sort!=='custom'){const h=hs(),m=new Map();S.folders.forEach(f=>m.set(f.id,{id:f.id,name:f.name,f}));S.quick.forEach(q=>m.set(q.id,{id:q.id,name:q.name,q}));S.items.forEach(i=>{if(i.pin)m.set(i.id,{id:i.id,name:i.name,i})});
+  return sortBy([...m.values()],o=>o.f?folderScore(o.f,h):o.q?quickItems(o.q).reduce((n,i)=>n+(h[i.id]||0),0):itemScore(o.i,h),h).map(o=>o.id)}
  const o=(S.desk||[]).filter(id=>all.includes(id));return[...o,...all.filter(id=>!o.includes(id))]};
 const desk=$('#desk');let dm=0;
 function flip(fn){const p={};desk.querySelectorAll('[data-id]').forEach(n=>p[n.dataset.id]=n.getBoundingClientRect());fn();
  if(RM)return;desk.querySelectorAll('[data-id]').forEach(n=>{const o=p[n.dataset.id];if(!o)return;const r=n.getBoundingClientRect(),dx=o.left-r.left,dy=o.top-r.top;
   if(dx||dy)n.animate([{transform:`translate(${dx}px,${dy}px)`},{transform:'none'}],{duration:300,easing:'cubic-bezier(.2,.8,.2,1)'})})}
 function renderDesk(){flip(()=>{desk.replaceChildren();
- deskIds().forEach(id=>{const f=S.folders.find(x=>x.id===id);let n;
-  if(f){n=el('button','ico');n.dataset.t='f';n.dataset.id=id;n.append(folderTile(f),el('span','',f.name));n.onclick=()=>openWin(id)}
+ deskIds().forEach(id=>{const f=S.folders.find(x=>x.id===id),qk=S.quick.find(x=>x.id===id);let n;
+  if(qk){n=el('button','ico');n.dataset.t='q';n.dataset.id=id;n.append(quickTile(qk),el('span','',qk.name));n.onclick=()=>openWin(id)}
+  else if(f){n=el('button','ico');n.dataset.t='f';n.dataset.id=id;n.append(folderTile(f),el('span','',f.name));n.onclick=()=>openWin(id)}
   else{const i=S.items.find(x=>x.id===id);n=link(i,'ico');n.append(tile(i),el('span','',i.name))}
   n.draggable=true;desk.append(n)});
- if(!desk.children.length)desk.append(el('p','hint','Right-click the page to add shortcuts or folders.'))})}
+ if(!desk.children.length)desk.append(el('p','hint','Right-click the page to add shortcuts, folders or quick starts.'))})}
 /* drag to rearrange */
 desk.addEventListener('dragstart',e=>{const n=e.target.closest('[data-id]');if(!n)return;dm=0;e.dataTransfer.effectAllowed='move';e.dataTransfer.setData('text/plain',n.dataset.id);requestAnimationFrame(()=>n.classList.add('drag'))});
 desk.addEventListener('dragover',e=>{const d=desk.querySelector('.drag');if(!d)return;e.preventDefault();
@@ -362,17 +391,18 @@ desk.addEventListener('dragend',()=>{desk.querySelectorAll('.drag').forEach(n=>n
 const wins={};let zi=10;
 function openWin(id){if(!wins[id]){const n=Object.keys(wins).length;wins[id]={x:Math.max(12,Math.min(360+n*28,innerWidth-460)),y:110+n*28,fresh:1}}wins[id].z=++zi;renderWins()}
 function renderWins(){const W=$('#wins');W.replaceChildren();
- for(const id in wins){const f=S.folders.find(x=>x.id===id);if(!f){delete wins[id];continue}
+ for(const id in wins){const f=S.folders.find(x=>x.id===id)||S.quick.find(x=>x.id===id);if(!f){delete wins[id];continue}const isQ=S.quick.includes(f);
   const o=wins[id],w=el('section','win');w.style.cssText=`left:${o.x}px;top:${o.y}px;z-index:${o.z}`;
   if(o.fresh){w.classList.add('in');delete o.fresh}
   w.addEventListener('pointerdown',()=>{o.z=++zi;w.style.zIndex=o.z});
   const h=el('header','wh');h.append(el('span','',f.name));
-  const x=el('button','x','✕');x.title='Close';x.onclick=()=>{delete wins[id];renderWins()};h.append(x);
-  h.onpointerdown=e=>{if(e.target===x)return;const sx=e.clientX-o.x,sy=e.clientY-o.y;h.setPointerCapture(e.pointerId);
+  const x=el('button','x','✕');x.title='Close';x.onclick=()=>{delete wins[id];renderWins()};
+  const hr=el('div','hr');if(isQ){const la=el('button','btn la','⚡ Launch all');la.type='button';la.title='Open every shortcut in new tabs';la.onclick=()=>launchQuick(f);hr.append(la)}hr.append(x);h.append(hr);
+  h.onpointerdown=e=>{if(e.target.closest('button'))return;const sx=e.clientX-o.x,sy=e.clientY-o.y;h.setPointerCapture(e.pointerId);
    h.onpointermove=m=>{o.x=Math.max(0,m.clientX-sx);o.y=Math.max(0,m.clientY-sy);w.style.left=o.x+'px';w.style.top=o.y+'px'};h.onpointerup=()=>{h.onpointermove=null}};
-  const b=el('div','wb');b.dataset.t='f';b.dataset.id=id;
-  byFolder(id).forEach(i=>{const a=link(i,'ico');a.append(tile(i),el('span','',i.name));b.append(a)});
-  if(!b.children.length)b.append(el('p','hint','Empty folder. Right-click to add a shortcut here.'));
+  const b=el('div','wb');b.dataset.t=isQ?'q':'f';b.dataset.id=id;
+  (isQ?quickItems(f):byFolder(id)).forEach(i=>{const a=link(i,'ico');a.append(tile(i),el('span','',i.name));b.append(a)});
+  if(!b.children.length)b.append(el('p','hint',''+(isQ?'Empty quick start. Right-click it and choose Edit to add shortcuts.':'Empty folder. Right-click to add a shortcut here.')+''));
   w.append(h,b);W.append(w)}}
 /* menus */
 const ctx=$('#ctx');
@@ -381,10 +411,12 @@ function menu(x,y,items){const ck=items.some(i=>i.length>3);ctx.replaceChildren(
 addEventListener('contextmenu',e=>{if(e.target.closest('dialog,input,#ctx'))return;e.preventDefault();
  const n=e.target.closest('[data-t]'),x=e.clientX,y=e.clientY;
  if(n&&n.dataset.t==='i'){const it=S.items.find(i=>i.id===n.dataset.id);
-  menu(x,y,[['Open in new tab',()=>{hit(it.id);open(norm(it.url),'_blank')}],['Edit',()=>itemDlg(it.id)],[it.pin?'Unpin from desktop':'Pin to desktop',()=>{it.pin=!it.pin;save();render()}],['Delete',()=>{if(confirm('Delete “'+it.name+'”?')){S.items=S.items.filter(i=>i!==it);{const h=getHits();delete h[it.id];setHits(h)}save();render()}},1]])}
+  menu(x,y,[['Open in new tab',()=>{hit(it.id);open(norm(it.url),'_blank')}],['Edit',()=>itemDlg(it.id)],[it.pin?'Unpin from desktop':'Pin to desktop',()=>{it.pin=!it.pin;save();render()}],['Delete',()=>{if(confirm('Delete “'+it.name+'”?')){S.items=S.items.filter(i=>i!==it);S.quick.forEach(q=>q.items=(q.items||[]).filter(x=>x!==it.id));{const h=getHits();delete h[it.id];setHits(h)}save();render()}},1]])}
+ else if(n&&n.dataset.t==='q'){const q=S.quick.find(i=>i.id===n.dataset.id);
+  menu(x,y,[['⚡ Launch all',()=>launchQuick(q)],['Open',()=>openWin(q.id)],['Edit quick start',()=>quickDlg(q.id)],['Delete quick start',()=>{if(confirm('Delete quick start “'+q.name+'”? Your shortcuts are kept.')){S.quick=S.quick.filter(i=>i!==q);save();render()}},1]])}
  else if(n){const f=S.folders.find(i=>i.id===n.dataset.id);
   menu(x,y,[['Open',()=>openWin(f.id)],['Add shortcut here',()=>itemDlg(null,f.id)],['Edit folder',()=>folderDlg(f.id)],['Delete folder',()=>{if(confirm('Delete folder “'+f.name+'”? Its shortcuts move out of the folder.')){S.items.forEach(i=>{if(i.folder===f.id)i.folder=''});S.folders=S.folders.filter(i=>i!==f);save();render()}},1]])}
- else menu(x,y,[['New shortcut',()=>itemDlg()],['New folder',()=>folderDlg()],['Manage tags',tagsDlg],['Appearance',appearance],['Settings',settings]])});
+ else menu(x,y,[['New shortcut',()=>itemDlg()],['New folder',()=>folderDlg()],['New quick start',()=>quickDlg()],['Manage tags',tagsDlg],['Appearance',appearance],['Settings',settings]])});
 addEventListener('click',e=>{if(!e.target.closest('#ctx'))ctx.hidden=true});
 addEventListener('keydown',e=>{if(e.key==='Escape')ctx.hidden=true;
  if(e.key==='/'&&!e.target.closest('input,select,dialog')){e.preventDefault();document.querySelector('#sf input').focus()}});
@@ -396,6 +428,7 @@ addEventListener('click',e=>{const a=e.target.closest&&e.target.closest('a[data-
 addEventListener('auxclick',e=>{const a=e.target.closest&&e.target.closest('a[data-t="i"]');if(a&&e.button===1)hit(a.dataset.id)});
 document.addEventListener('visibilitychange',()=>{if(document.hidden)return;if(dirty&&S.sort==='freq')render();dirty=0});
 $('#gear').onclick=settings;$('#look').onclick=appearance;
+{const L=$('#list');let t;L.addEventListener('scroll',()=>{L.classList.add('scrolling');clearTimeout(t);t=setTimeout(()=>L.classList.remove('scrolling'),900)},{passive:true})}
 $('#q').oninput=e=>{q=e.target.value.trim().toLowerCase();renderSide()};
 function dots(cur,presets,pick){const w=el('div','dots');
  const draw=()=>{w.replaceChildren(...presets.map(c=>{const b=el('button','dot'+(c===cur?' on':''));b.type='button';b.title=c||'Theme default';b.style.background=c||'linear-gradient(135deg,#fff 50%,#cbd5e1 50%)';b.onclick=()=>{cur=c;pick(c);draw()};return b}));
@@ -423,6 +456,16 @@ function folderDlg(id){const old=id&&S.folders.find(f=>f.id===id),f={...(old||{i
  const pv=el('div'),ig=el('div','ig'),top=el('div','pvr');top.append(pv,fld('Name',name));
  const paint=()=>{pv.replaceChildren(folderTile(f));ig.replaceChildren(...Object.keys(ICONS).map(k=>{const b=el('button','ib2'+(k===f.icon?' on':''));b.type='button';b.title=k;b.innerHTML=glyph(k);b.onclick=()=>{f.icon=k;paint()};return b}))};paint();
  modal(old?'Edit folder':'New folder',[top,el('div','lab','Icon'),ig],()=>{f.name=name.value.trim();if(old)Object.assign(old,f);else S.folders.push(f);save();render()})}
+function quickDlg(id){const old=id&&S.quick.find(q=>q.id===id),f={...(old||{id:uid(),name:'',items:[]})};f.icon=f.icon||'bolt';f.items=[...(f.items||[])];
+ const name=inp(f.name,'Quick start name, e.g. Morning');name.required=true;
+ const pv=el('div'),ig=el('div','ig'),top=el('div','pvr');top.append(pv,fld('Name',name));
+ const paint=()=>{pv.replaceChildren(quickTile(f));ig.replaceChildren(...Object.keys(ICONS).map(k=>{const b=el('button','ib2'+(k===f.icon?' on':''));b.type='button';b.title=k;b.innerHTML=glyph(k);b.onclick=()=>{f.icon=k;paint()};return b}))};paint();
+ const pick=el('div','qpick'),sel=new Set(f.items),cnt=el('div','lab');
+ const count=()=>{cnt.textContent='Shortcuts to launch ('+sel.size+' selected). A shortcut can belong to any number of quick starts.'};count();
+ [...S.items].sort(cmpN).forEach(i=>{const l=el('label'),c=el('input');c.type='checkbox';c.checked=sel.has(i.id);c.onchange=()=>{c.checked?sel.add(i.id):sel.delete(i.id);count()};
+  const t=tile(i);t.classList.add('sm');l.append(c,t,el('span','nm',i.name));pick.append(l)});
+ if(!S.items.length)pick.append(el('p','hint','Add some shortcuts first.'));
+ modal(old?'Edit quick start':'New quick start',[top,el('div','lab','Icon'),ig,cnt,pick],()=>{f.name=name.value.trim();f.items=S.items.map(i=>i.id).filter(x=>sel.has(x));if(old)Object.assign(old,f);else S.quick.push(f);save();render()})}
 function tagsDlg(){const cnt={};S.items.forEach(i=>{if(i.tag)cnt[i.tag]=(cnt[i.tag]||0)+1});const rows=[],box=el('div');
  Object.keys(cnt).sort().forEach(t=>{const r=el('div','trow'),i=inp(t),n=el('span','n',cnt[t]+(cnt[t]>1?' shortcuts':' shortcut')),d=el('button','ib','✕');d.type='button';d.title='Delete tag';
   d.onclick=()=>{r.classList.toggle('del');d.textContent=r.classList.contains('del')?'↺':'✕'};r.append(i,n,d);box.append(r);rows.push([t,i,r])});
@@ -445,18 +488,31 @@ function itemDlg(id,folder=''){const old=id&&S.items.find(i=>i.id===id);
  tag.setAttribute('list','taglist');const dl=el('datalist');dl.id='taglist';[...new Set(S.items.map(i=>i.tag).filter(Boolean))].forEach(t=>{const o=el('option');o.value=t;dl.append(o)});
  const sel=el('select');[['','No folder']].concat(S.folders.map(f=>[f.id,f.name])).forEach(([v,t])=>{const o=el('option','',t);o.value=v;sel.append(o)});sel.value=it.folder;
  const pin=el('input');pin.type='checkbox';pin.checked=it.pin;const pl=el('label','rw');pl.append(pin,'Show on desktop');
- const pv=el('div'),drawPv=()=>pv.replaceChildren(tile({...it,name:name.value||'?',url:url.value}));
+ const pv=el('div'),sz=el('div','szc'),szIn=el('input'),szVal=el('span','v'),szRst=el('button','rs','Reset');
+ szIn.type='range';szIn.min=30;szIn.max=100;szIn.step=1;szIn.className='sl';szRst.type='button';szRst.title='Back to the default size';
+ const mini=n=>`<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2" y="2" width="20" height="20" rx="6"/><rect x="${12-n/2}" y="${12-n/2}" width="${n}" height="${n}" rx="2" fill="currentColor" stroke="none"/></svg>`;
+ const szH=el('div','szh'),szR=el('div','szr'),lo=el('span'),hi=el('span');lo.innerHTML=mini(5);hi.innerHTML=mini(14);
+ szH.append(el('b','','Icon size'),szVal,szRst);szR.append(lo,szIn,hi);sz.append(szH,szR);
+ const fill=()=>{szIn.style.setProperty('--p',(szIn.value-30)/70*100+'%');szVal.textContent=szIn.value+'%'};
+ const syncSz=()=>{sz.hidden=!it.img;szIn.value=it.scale||defScale(it);fill();szRst.disabled=!it.scale};
+ const drawPv=()=>{pv.replaceChildren(tile({...it,name:name.value||'?',url:url.value}));syncSz()};
+ szIn.oninput=()=>{it.scale=+szIn.value;fill();szRst.disabled=false;const i=pv.querySelector('img');if(i){i.style.width=i.style.height=it.scale+'%';i.style.objectFit='contain'}};
+ szRst.onclick=()=>{delete it.scale;drawPv()};
  const iu=inp(it.img.startsWith('data:')?'':it.img,'…or paste an image URL');
  const up=upload('Upload image',async f=>{try{it.img=await imgData(f,128);iu.value='';drawPv()}catch(e){alert('Couldn’t read that image.')}});
  iu.onchange=()=>{it.img=iu.value.trim();drawPv()};name.onchange=url.onchange=drawPv;
- const rm=el('button','btn','Use site icon');rm.type='button';rm.onclick=()=>{it.img='';iu.value='';drawPv()};
+ const rm=el('button','btn','Use site icon');rm.type='button';rm.onclick=()=>{it.img='';delete it.scale;iu.value='';drawPv()};
  drawPv();
  const bfd=brandFinder(it,name,iu,drawPv),acts=el('div','rw');acts.append(up,rm,bfd.btn);const prow=el('div','pvr');prow.append(pv,acts);
- const imgBox=el('div','fld');imgBox.append(el('span','','Icon image'),prow,iu,bfd.box);
- modal(old?'Edit shortcut':'New shortcut',[fld('Name',name),fld('Address',url),fld('Description',desc),fld('Tag',tag),dl,fld('Folder',sel),pl,imgBox],()=>{
+ const qsel=new Set(S.quick.filter(q=>(q.items||[]).includes(it.id)).map(q=>q.id)),qbox=el('div','fld');
+ if(S.quick.length){qbox.append(el('span','','Quick starts'));S.quick.forEach(q=>{const l=el('label','rw'),c=el('input');c.type='checkbox';c.checked=qsel.has(q.id);c.onchange=()=>{c.checked?qsel.add(q.id):qsel.delete(q.id)};l.append(c,q.name);qbox.append(l)})}
+ const imgBox=el('div','fld');imgBox.append(el('span','','Icon image'),prow,sz,iu,bfd.box);
+ modal(old?'Edit shortcut':'New shortcut',[fld('Name',name),fld('Address',url),fld('Description',desc),fld('Tag',tag),dl,fld('Folder',sel),pl,...(S.quick.length?[qbox]:[]),imgBox],()=>{
   const img=iu.value.trim()||(it.img.startsWith('data:')?it.img:'');
+  if(!img)delete it.scale;
   Object.assign(it,{name:name.value.trim(),desc:desc.value.trim(),url:url.value.trim(),tag:tag.value.trim(),folder:sel.value,pin:pin.checked,img});
-  if(old)Object.assign(old,it);else S.items.push(it);save();render()})}
+  if(old){Object.assign(old,it);if(!it.scale)delete old.scale}else S.items.push(it);
+  S.quick.forEach(q=>{q.items=(q.items||[]).filter(x=>x!==it.id);if(qsel.has(q.id))q.items.push(it.id)});save();render()})}
 const sec=(h,...n)=>{const d=el('div','sec');d.append(el('h3','',h),...n);return d};
 const mk=(t,fn)=>{const b=el('button','btn',t);b.type='button';b.onclick=fn;return b};
 function appearance(){const box=el('div'),apply=()=>{save();applyTheme()};
@@ -485,12 +541,12 @@ function settings(){const box=el('div');
   sec('Usage',ub),
   sec('Import & export',dr,el('p','note','Everything is saved in this browser only. Export a backup to move it to another computer. Reset returns the page to its defaults.')));
  modal('Settings',[box],null)}
-function resetAll(){if(!confirm('Reset everything to the defaults? This deletes all shortcuts, folders, tags, open counts and appearance settings. Export a backup first if you want to keep them.'))return;S=seed();setHits({});save();applyTheme();render();dlg.close()}
+function resetAll(){if(!confirm('Reset everything to the defaults? This deletes all shortcuts, folders, quick starts, tags, open counts and appearance settings. Export a backup first if you want to keep them.'))return;S=seed();setHits({});save();applyTheme();render();dlg.close()}
 function exportData(){const a=el('a');a.href=URL.createObjectURL(new Blob([JSON.stringify({...S,hits:getHits()},null,1)],{type:'application/json'}));a.download='startpage-backup-'+new Date().toISOString().slice(0,10)+'.json';a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1500)}
 function importData(){const f=el('input');f.type='file';f.accept='.json,application/json';
  f.onchange=async()=>{try{const d=JSON.parse(await f.files[0].text());if(!Array.isArray(d.items))throw 0;
   if(!confirm('Replace everything on this page with the backup?'))return;
-  S={...seed(),...d,folders:Array.isArray(d.folders)?d.folders:[]};delete S.hits;setHits(d.hits&&typeof d.hits==='object'?d.hits:{});if(!SORTS[S.sort])S.sort='custom';if(save()){applyTheme();render()}}catch(e){alert('That file isn’t a valid backup.')}};f.click()}
+  S={...seed(),...d,folders:Array.isArray(d.folders)?d.folders:[],quick:Array.isArray(d.quick)?d.quick:[]};delete S.hits;setHits(d.hits&&typeof d.hits==='object'?d.hits:{});if(!SORTS[S.sort])S.sort='custom';if(save()){applyTheme();render()}}catch(e){alert('That file isn’t a valid backup.')}};f.click()}
 function tick(){const d=new Date();$('#ck').textContent=d.toLocaleTimeString([],{hour:'numeric',minute:'2-digit'});$('#cd').textContent=d.toLocaleDateString([],{weekday:'long',month:'long',day:'numeric'})}
 tick();setInterval(tick,10000);applyTheme();render();
 </script>
