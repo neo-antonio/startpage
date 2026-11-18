@@ -30,11 +30,8 @@ body.rail #tog svg{transform:rotate(180deg)}
 .chip{border:1px solid var(--line);background:none;color:var(--dim);border-radius:14px;padding:1px 10px;font-size:12px;transition:all .18s}
 .chip:hover{color:var(--text)}
 .chip.on{background:var(--accent);color:var(--onacc);border-color:var(--accent)}
-#list{overflow:auto;padding:2px 8px 10px;flex:1;scrollbar-width:thin;scrollbar-color:transparent transparent}
-#list.scrolling{scrollbar-color:var(--dim) transparent}
-#list::-webkit-scrollbar{width:8px}
-#list::-webkit-scrollbar-thumb{background:transparent;border-radius:4px}
-#list.scrolling::-webkit-scrollbar-thumb{background:var(--dim)}
+#list{overflow:auto;padding:2px 8px 10px;flex:1;scrollbar-width:none;-ms-overflow-style:none}
+#list::-webkit-scrollbar{display:none}
 .row{display:flex;align-items:center;gap:11px;padding:6px 8px;border-radius:10px;color:var(--text);text-decoration:none;transition:background .15s}
 .row:hover{background:var(--hover)}
 .row .tile{width:28px;height:28px;font-size:13px;border-radius:8px;margin:0;flex:none;box-shadow:none;transition:width .3s var(--ease),height .3s var(--ease)}
@@ -428,7 +425,6 @@ addEventListener('click',e=>{const a=e.target.closest&&e.target.closest('a[data-
 addEventListener('auxclick',e=>{const a=e.target.closest&&e.target.closest('a[data-t="i"]');if(a&&e.button===1)hit(a.dataset.id)});
 document.addEventListener('visibilitychange',()=>{if(document.hidden)return;if(dirty&&S.sort==='freq')render();dirty=0});
 $('#gear').onclick=settings;$('#look').onclick=appearance;
-{const L=$('#list');let t;L.addEventListener('scroll',()=>{L.classList.add('scrolling');clearTimeout(t);t=setTimeout(()=>L.classList.remove('scrolling'),900)},{passive:true})}
 $('#q').oninput=e=>{q=e.target.value.trim().toLowerCase();renderSide()};
 function dots(cur,presets,pick){const w=el('div','dots');
  const draw=()=>{w.replaceChildren(...presets.map(c=>{const b=el('button','dot'+(c===cur?' on':''));b.type='button';b.title=c||'Theme default';b.style.background=c||'linear-gradient(135deg,#fff 50%,#cbd5e1 50%)';b.onclick=()=>{cur=c;pick(c);draw()};return b}));
