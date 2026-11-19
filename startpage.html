@@ -200,7 +200,7 @@ dialog textarea{background:var(--hover);border:1px solid transparent;color:var(-
 <div id="app">
   <aside>
     <div class="sh">
-      <div class="seg" id="mode" role="tablist" aria-label="Sidebar mode"><button type="button" role="tab" data-m="links" title="Shortcuts"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1"/></svg><span class="lb">Shortcuts</span></button><button type="button" role="tab" data-m="notes" title="Notes"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M5 4h14a1 1 0 0 1 1 1v9l-6 6H5a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1z"/><path d="M14 20v-5a1 1 0 0 1 1-1h5M8 9h8M8 13h4"/></svg><span class="lb">Notes</span></button></div><span id="ttl" hidden>Shortcuts</span>
+      <div class="seg" id="mode" role="tablist" aria-label="Sidebar mode"><button type="button" role="tab" data-m="links" title="Shortcuts"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1"/></svg><span class="lb">Shortcuts</span></button><button type="button" role="tab" data-m="notes" title="Files"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M5 4h14a1 1 0 0 1 1 1v9l-6 6H5a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1z"/><path d="M14 20v-5a1 1 0 0 1 1-1h5M8 9h8M8 13h4"/></svg><span class="lb">Files</span></button></div><span id="ttl" hidden>Shortcuts</span>
       <button class="ib" id="sort" title="Sort shortcuts" aria-label="Sort shortcuts"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h16M7 12h10M10 17h4"/></svg></button>
       <button class="ib" id="add" title="New shortcut" aria-label="New shortcut">+</button>
       <button class="ib" id="tog" title="Collapse or expand sidebar" aria-label="Collapse or expand sidebar"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 6-6 6 6 6"/></svg></button>
@@ -275,7 +275,7 @@ const seed=()=>({v:2,mode:'links',notes:[],nfolders:[],theme:'light',accent:'',b
  {id:uid(),name:'Calendar',url:'https://calendar.google.com',tag:'work',folder:'f1',pin:false,img:''}]});
 let S;try{S=JSON.parse(localStorage.getItem(KEY))}catch(e){}
 if(!S||!Array.isArray(S.items))S=seed();
-if(!Array.isArray(S.quick))S.quick=[];if(!Array.isArray(S.notes))S.notes=[];if(!Array.isArray(S.nfolders))S.nfolders=[];if(S.mode!=='notes')S.mode='links';
+if(!Array.isArray(S.quick))S.quick=[];if(!Array.isArray(S.notes))S.notes=[];if(!Array.isArray(S.nfolders))S.nfolders=[];if(S.mode!=='notes')S.mode='links';S.notes.forEach(n=>{if(n.url===undefined){n.url='';if(n.body&&!n.desc)n.desc=n.body.replace(/\s+/g,' ').trim().slice(0,160);delete n.body;delete n.color}});
 const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(S));return true}catch(e){alert('Couldn’t save: browser storage is full. Try a smaller background or icon image.');return false}};
 const lum=h=>{const n=parseInt(h.slice(1),16);return(.299*(n>>16)+.587*(n>>8&255)+.114*(n&255))/255};
 function applyTheme(){const t=THEMES[S.theme]||THEMES.light,r=document.documentElement.style,acc=S.accent||t.acc;
@@ -331,17 +331,11 @@ function launchQuick(q){const its=quickItems(q);if(!its.length){alert('This quic
  let blocked=0;its.forEach(i=>{hit(i.id);const w=open(norm(i.url),'_blank');if(w)w.opener=null;else blocked++});
  if(blocked)alert('Your browser blocked '+blocked+' of '+its.length+' tabs. Allow pop-ups for this page, then launch again.')}
 const folderTile=f=>{const d=el('div','tile fold');d.innerHTML=glyph(f.icon||'folder');return d};
-const noteTile=n=>{const d=el('div','tile note');d.style.background=n.color||hue(n.name||'?');d.innerHTML=glyph('note');return d};
-const fixTitle=n=>{n.name=(n.name||'').trim()||(n.body||'').trim().split('\n')[0].slice(0,40)||'Untitled'};
-let nsT=0;const ns=()=>{clearTimeout(nsT);nsT=setTimeout(()=>{nsT=0;save()},400)},syncNote=()=>{clearTimeout(nsT);nsT=0;save();renderSide();renderDesk()};
-addEventListener('pagehide',()=>{if(nsT){clearTimeout(nsT);try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}}});
-function openNote(id){hit(id);if(wins[id])wins[id].foc=1;openWin(id)}
-function delNote(n){S.notes=S.notes.filter(i=>i!==n);const h=getHits();delete h[n.id];setHits(h);save();render()}
 function syncMode(){const n=NM(),w=n?'note':'shortcut';$('#mode').hidden=!!S.notesOff;$('#ttl').hidden=!S.notesOff;document.querySelectorAll('#mode button').forEach(b=>{const on=(b.dataset.m==='notes')===n;b.classList.toggle('on',on);b.setAttribute('aria-selected',on)});
- const a=$('#add');a.title='New '+w;a.setAttribute('aria-label','New '+w);$('#sort').setAttribute('aria-label','Sort '+w+'s');$('#q').placeholder=n?'Search notes':'Search'}
+ const a=$('#add');a.title='New '+w;a.setAttribute('aria-label','New '+w);$('#sort').setAttribute('aria-label','Sort '+w+'s');$('#q').placeholder=n?'Search files':'Search'}
 function setMode(m){if(NM()===(m==='notes'))return;S.mode=m;q='';tagF='';$('#q').value='';save();render();
  if(!RM)$('#list').animate([{opacity:0,transform:'translateY(6px)'},{opacity:1,transform:'none'}],{duration:240,easing:'cubic-bezier(.2,.8,.2,1)'})}
-const link=(it,c)=>{const a=el('a',c);a.href=norm(it.url);a.target='_blank';a.rel='noopener';a.dataset.t='i';a.dataset.id=it.id;return a};
+const link=(it,c)=>{const a=el('a',c);if(it.url)a.href=norm(it.url);a.target='_blank';a.rel='noopener';a.dataset.t='i';a.dataset.id=it.id;return a};
 let tagF='',q='';
 function render(){syncSort();syncMode();renderSide();renderDesk();renderWins()}
 function renderSide(){
@@ -351,8 +345,7 @@ function renderSide(){
  const can=!rail&&!q&&!tagF,ok=i=>rail||((!tagF||i.tag===tagF)&&(!q||(i.name+' '+(i.url||'')+' '+i.tag+' '+(i.desc||'')+' '+(i.body||'')).toLowerCase().includes(q)));
  const list=$('#list');list.replaceChildren();
  const row=i=>{const a=link(i,'row');a.title=i.name+(i.desc?' — '+i.desc:'');a.draggable=can;const tx=el('span','tx');tx.append(el('span','nm',i.name));if(i.desc)tx.append(el('span','ds',i.desc));a.append(tile(i),tx);if(i.tag)a.append(el('span','tag',i.tag));return a};
- const noteRow=i=>{const a=el('a','row');a.tabIndex=0;a.dataset.t='n';a.dataset.id=i.id;a.title=i.name;a.draggable=can;const tx=el('span','tx'),pv=(i.body||'').replace(/\s+/g,' ').trim().slice(0,90);tx.append(el('span','nm',i.name));if(pv)tx.append(el('span','ds',pv));a.append(noteTile(i),tx);if(i.tag)a.append(el('span','tag',i.tag));
-  a.onclick=()=>openNote(i.id);a.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();openNote(i.id)}};return a},R=NM()?noteRow:row;
+ const R=row;
  byFolder('').filter(ok).forEach(i=>list.append(R(i)));
  sortedFolders().forEach(f=>{const its=byFolder(f.id).filter(ok);
   if(rail){if(its.length){list.append(el('hr'));its.forEach(i=>list.append(R(i)))}return}
@@ -360,7 +353,7 @@ function renderSide(){
   const shut=(S.closed||[]).includes(f.id),d=el('details','grp'+(shut?' closed':''));d.open=!shut;d.dataset.t=NM()?'nf':'f';d.dataset.id=f.id;
   const s=el('summary');s.draggable=can;s.append(el('span','nm',f.name),el('span','cnt',String(its.length)));const gc=el('div','gc');its.forEach(i=>gc.append(R(i)));d.append(s,gc);
   s.onclick=e=>{e.preventDefault();toggleGrp(d,f.id,gc)};list.append(d)});
- if(!IT().length&&!rail)list.append(el('p','hint',NM()?'No notes yet. Select + to add one. Right-click to make a folder.':'No shortcuts yet. Select + to add one.'))}
+ if(!IT().length&&!rail)list.append(el('p','hint',NM()?'No files yet. Select + to add one. Right-click to make a folder.':'No shortcuts yet. Select + to add one.'))}
 function toggleGrp(d,id,c){const open=!d.open,E='cubic-bezier(.2,.8,.2,1)';d.classList.toggle('closed',!open);
  S.closed=(S.closed||[]).filter(x=>x!==id);if(!open)S.closed.push(id);save();
  if(RM){d.open=open;return}
@@ -404,11 +397,10 @@ function flip(fn){const p={};desk.querySelectorAll('[data-id]').forEach(n=>p[n.d
  if(RM)return;desk.querySelectorAll('[data-id]').forEach(n=>{const o=p[n.dataset.id];if(!o)return;const r=n.getBoundingClientRect(),dx=o.left-r.left,dy=o.top-r.top;
   if(dx||dy)n.animate([{transform:`translate(${dx}px,${dy}px)`},{transform:'none'}],{duration:300,easing:'cubic-bezier(.2,.8,.2,1)'})})}
 function renderDesk(){flip(()=>{desk.replaceChildren();
- deskIds().forEach(id=>{const f=S.folders.find(x=>x.id===id)||S.nfolders.find(x=>x.id===id),nt=S.notes.find(x=>x.id===id),qk=S.quick.find(x=>x.id===id);let n;
+ deskIds().forEach(id=>{const f=S.folders.find(x=>x.id===id)||S.nfolders.find(x=>x.id===id),qk=S.quick.find(x=>x.id===id);let n;
   if(qk){n=el('button','ico');n.dataset.t='q';n.dataset.id=id;n.append(quickTile(qk),el('span','',qk.name));n.onclick=()=>openWin(id)}
-  else if(nt){n=el('button','ico');n.dataset.t='n';n.dataset.id=id;n.append(noteTile(nt),el('span','',nt.name));n.onclick=()=>openNote(id)}
   else if(f){n=el('button','ico');n.dataset.t=S.nfolders.includes(f)?'nf':'f';n.dataset.id=id;n.append(folderTile(f),el('span','',f.name));n.onclick=()=>openWin(id)}
-  else{const i=S.items.find(x=>x.id===id);n=link(i,'ico');n.append(tile(i),el('span','',i.name))}
+  else{const i=[...S.items,...S.notes].find(x=>x.id===id);n=link(i,'ico');n.append(tile(i),el('span','',i.name))}
   n.draggable=true;desk.append(n)});
  if(!desk.children.length)desk.append(el('p','hint','Right-click the page to add shortcuts, folders or quick starts.'))})}
 /* drag to rearrange */
@@ -422,24 +414,18 @@ desk.addEventListener('dragend',()=>{desk.querySelectorAll('.drag').forEach(n=>n
 const wins={};let zi=10;
 function openWin(id){if(!wins[id]){const n=Object.keys(wins).length;wins[id]={x:Math.max(12,Math.min(360+n*28,innerWidth-460)),y:110+n*28,fresh:1}}wins[id].z=++zi;renderWins()}
 function renderWins(){const W=$('#wins');W.replaceChildren();
- for(const id in wins){const nt=S.notes.find(x=>x.id===id),f=nt||S.folders.find(x=>x.id===id)||S.nfolders.find(x=>x.id===id)||S.quick.find(x=>x.id===id);if(!f){delete wins[id];continue}const isQ=S.quick.includes(f),isNF=S.nfolders.includes(f);
-  const o=wins[id],w=el('section','win'+(nt?' nw':'')),foc=o.fresh||o.foc;delete o.foc;w.style.cssText=`left:${o.x}px;top:${o.y}px;z-index:${o.z}`;
+ for(const id in wins){const f=S.folders.find(x=>x.id===id)||S.nfolders.find(x=>x.id===id)||S.quick.find(x=>x.id===id);if(!f){delete wins[id];continue}const isQ=S.quick.includes(f),isNF=S.nfolders.includes(f);
+  const o=wins[id],w=el('section','win');w.style.cssText=`left:${o.x}px;top:${o.y}px;z-index:${o.z}`;
   if(o.fresh){w.classList.add('in');delete o.fresh}
   w.addEventListener('pointerdown',()=>{o.z=++zi;w.style.zIndex=o.z});
-  const h=el('header','wh'),hr=el('div','hr'),x=el('button','x','✕');x.title='Close';x.onclick=()=>{delete wins[id];renderWins()};
-  if(nt){const t=el('input','wt');t.value=nt.name;t.placeholder='Untitled';t.setAttribute('aria-label','Note title');t.oninput=()=>{nt.name=t.value;ns()};t.onblur=()=>{fixTitle(nt);t.value=nt.name;syncNote()};h.append(t);
-   const dt=el('button','x','⋯');dt.type='button';dt.title='Details: tag, folder, color, desktop';dt.onclick=()=>noteDlg(id);hr.append(dt)}
-  else h.append(el('span','',f.name));
-  if(isQ){const la=el('button','btn la','Launch all');la.type='button';la.title='Open every shortcut in new tabs';la.onclick=()=>launchQuick(f);hr.append(la)}hr.append(x);h.append(hr);
-  h.onpointerdown=e=>{if(e.target.closest('button,input'))return;const sx=e.clientX-o.x,sy=e.clientY-o.y;h.setPointerCapture(e.pointerId);
+  const h=el('header','wh');h.append(el('span','',f.name));
+  const x=el('button','x','✕');x.title='Close';x.onclick=()=>{delete wins[id];renderWins()};
+  const hr=el('div','hr');if(isQ){const la=el('button','btn la','Launch all');la.type='button';la.title='Open every shortcut in new tabs';la.onclick=()=>launchQuick(f);hr.append(la)}hr.append(x);h.append(hr);
+  h.onpointerdown=e=>{if(e.target.closest('button'))return;const sx=e.clientX-o.x,sy=e.clientY-o.y;h.setPointerCapture(e.pointerId);
    h.onpointermove=m=>{o.x=Math.max(0,m.clientX-sx);o.y=Math.max(0,m.clientY-sy);w.style.left=o.x+'px';w.style.top=o.y+'px'};h.onpointerup=()=>{h.onpointermove=null}};
-  if(nt){const nb=el('div','nb'),ta=el('textarea');ta.value=nt.body||'';ta.placeholder='Start typing…';ta.setAttribute('aria-label','Note text');ta.oninput=()=>{nt.body=ta.value;ns()};ta.onblur=syncNote;nb.append(ta);w.append(h,nb);W.append(w);
-   if(foc)setTimeout(()=>{ta.focus();ta.setSelectionRange(ta.value.length,ta.value.length)},0);continue}
   const b=el('div','wb');b.dataset.t=isQ?'q':isNF?'nf':'f';b.dataset.id=id;
-  (isQ?quickItems(f):inFolder(isNF?S.notes:S.items,id)).forEach(i=>{
-   if(isNF){const a=el('button','ico');a.dataset.t='n';a.dataset.id=i.id;a.append(noteTile(i),el('span','',i.name));a.onclick=()=>openNote(i.id);b.append(a)}
-   else{const a=link(i,'ico');a.append(tile(i),el('span','',i.name));b.append(a)}});
-  if(!b.children.length)b.append(el('p','hint',isQ?'Empty quick start. Right-click it and choose Edit to add shortcuts.':isNF?'Empty folder. Right-click to add a note here.':'Empty folder. Right-click to add a shortcut here.'));
+  (isQ?quickItems(f):inFolder(isNF?S.notes:S.items,id)).forEach(i=>{const a=link(i,'ico');a.append(tile(i),el('span','',i.name));b.append(a)});
+  if(!b.children.length)b.append(el('p','hint',isQ?'Empty quick start. Right-click it and choose Edit to add shortcuts.':isNF?'Empty folder. Right-click to add a file here.':'Empty folder. Right-click to add a shortcut here.'));
   w.append(h,b);W.append(w)}}
 /* menus */
 const ctx=$('#ctx');
@@ -447,23 +433,21 @@ function menu(x,y,items){const ck=items.some(i=>i.length>3);ctx.replaceChildren(
  ctx.hidden=false;const r=ctx.getBoundingClientRect();ctx.style.left=Math.min(x,innerWidth-r.width-8)+'px';ctx.style.top=Math.min(y,innerHeight-r.height-8)+'px'}
 addEventListener('contextmenu',e=>{if(e.target.closest('dialog,input,textarea,#ctx'))return;e.preventDefault();
  const n=e.target.closest('[data-t]'),x=e.clientX,y=e.clientY;
- if(n&&n.dataset.t==='i'){const it=S.items.find(i=>i.id===n.dataset.id);
-  menu(x,y,[['Open in new tab',()=>{hit(it.id);open(norm(it.url),'_blank')}],['Edit',()=>itemDlg(it.id)],[it.pin?'Unpin from desktop':'Pin to desktop',()=>{it.pin=!it.pin;save();render()}],['Delete',()=>{if(confirm('Delete “'+it.name+'”?')){S.items=S.items.filter(i=>i!==it);S.quick.forEach(q=>q.items=(q.items||[]).filter(x=>x!==it.id));{const h=getHits();delete h[it.id];setHits(h)}save();render()}},1]])}
- else if(n&&n.dataset.t==='n'){const nt=S.notes.find(i=>i.id===n.dataset.id);
-  menu(x,y,[['Open',()=>openNote(nt.id)],['Edit details',()=>noteDlg(nt.id)],[nt.pin?'Unpin from desktop':'Pin to desktop',()=>{nt.pin=!nt.pin;save();render()}],['Delete',()=>{if(confirm('Delete note “'+nt.name+'”?'))delNote(nt)},1]])}
+ if(n&&n.dataset.t==='i'){const it=[...S.items,...S.notes].find(i=>i.id===n.dataset.id);
+  menu(x,y,[['Open in new tab',()=>{hit(it.id);open(norm(it.url),'_blank')}],['Edit',()=>itemDlg(it.id)],[it.pin?'Unpin from desktop':'Pin to desktop',()=>{it.pin=!it.pin;save();render()}],['Delete',()=>{if(confirm('Delete “'+it.name+'”?')){S.items=S.items.filter(i=>i!==it);S.notes=S.notes.filter(i=>i!==it);S.quick.forEach(q=>q.items=(q.items||[]).filter(x=>x!==it.id));{const h=getHits();delete h[it.id];setHits(h)}save();render()}},1]])}
  else if(n&&n.dataset.t==='nf'){const f=S.nfolders.find(i=>i.id===n.dataset.id);
-  menu(x,y,[['Open',()=>openWin(f.id)],['Add note here',()=>noteDlg(null,f.id)],['Edit folder',()=>folderDlg(f.id,1)],[f.pin?'Unpin from desktop':'Pin to desktop',()=>{f.pin=!f.pin;save();render()}],['Delete folder',()=>{if(confirm('Delete folder “'+f.name+'”? Its notes move out of the folder.')){S.notes.forEach(i=>{if(i.folder===f.id)i.folder=''});S.nfolders=S.nfolders.filter(i=>i!==f);save();render()}},1]])}
+  menu(x,y,[['Open',()=>openWin(f.id)],['Add file here',()=>itemDlg(null,f.id,true)],['Edit folder',()=>folderDlg(f.id,1)],[f.pin?'Unpin from desktop':'Pin to desktop',()=>{f.pin=!f.pin;save();render()}],['Delete folder',()=>{if(confirm('Delete folder “'+f.name+'”? Its files move out of the folder.')){S.notes.forEach(i=>{if(i.folder===f.id)i.folder=''});S.nfolders=S.nfolders.filter(i=>i!==f);save();render()}},1]])}
  else if(n&&n.dataset.t==='q'){const q=S.quick.find(i=>i.id===n.dataset.id);
   menu(x,y,[['Launch all',()=>launchQuick(q)],['Open',()=>openWin(q.id)],['Edit quick start',()=>quickDlg(q.id)],['Delete quick start',()=>{if(confirm('Delete quick start “'+q.name+'”? Your shortcuts are kept.')){S.quick=S.quick.filter(i=>i!==q);save();render()}},1]])}
  else if(n){const f=S.folders.find(i=>i.id===n.dataset.id);
-  menu(x,y,[['Open',()=>openWin(f.id)],['Add shortcut here',()=>itemDlg(null,f.id)],['Edit folder',()=>folderDlg(f.id)],['Delete folder',()=>{if(confirm('Delete folder “'+f.name+'”? Its shortcuts move out of the folder.')){S.items.forEach(i=>{if(i.folder===f.id)i.folder=''});S.folders=S.folders.filter(i=>i!==f);save();render()}},1]])}
- else{const nm=[['New note',()=>noteDlg()],['New note folder',()=>folderDlg(null,1)]],sm=[['New shortcut',()=>itemDlg()],['New folder',()=>folderDlg()],['New quick start',()=>quickDlg()]];
+  menu(x,y,[['Open',()=>openWin(f.id)],['Add shortcut here',()=>itemDlg(null,f.id,false)],['Edit folder',()=>folderDlg(f.id)],['Delete folder',()=>{if(confirm('Delete folder “'+f.name+'”? Its shortcuts move out of the folder.')){S.items.forEach(i=>{if(i.folder===f.id)i.folder=''});S.folders=S.folders.filter(i=>i!==f);save();render()}},1]])}
+ else{const nm=[['New file',()=>itemDlg(null,'',true)],['New file folder',()=>folderDlg(null,1)]],sm=[['New shortcut',()=>itemDlg(null,'',false)],['New folder',()=>folderDlg()],['New quick start',()=>quickDlg()]];
   menu(x,y,[...(S.notesOff?sm:NM()?[...nm,...sm]:[...sm,...nm]),['Manage tags',tagsDlg],['Appearance',appearance],['Settings',settings]])}});
 addEventListener('click',e=>{if(!e.target.closest('#ctx'))ctx.hidden=true});
 addEventListener('keydown',e=>{if(e.key==='Escape')ctx.hidden=true;
  if(e.key==='/'&&!e.target.closest('input,select,textarea,dialog')){e.preventDefault();document.querySelector('#sf input').focus()}});
 $('#tog').onclick=()=>{S.sb=!S.sb;save();applyTheme();renderSide()};
-$('#add').onclick=()=>NM()?noteDlg():itemDlg();
+$('#add').onclick=()=>itemDlg();
 document.querySelectorAll('#mode button').forEach(b=>b.onclick=()=>setMode(b.dataset.m));
 $('#sort').onclick=e=>{e.stopPropagation();const r=e.currentTarget.getBoundingClientRect();
  menu(S.sb?r.left:r.right+8,S.sb?r.bottom+6:r.top,Object.entries(SORTS).map(([k,t])=>[t,()=>{S.sort=k;save();render()},0,S.sort===k]))};
@@ -498,7 +482,7 @@ function folderDlg(id,nf){const L=nf?S.nfolders:S.folders,old=id&&L.find(f=>f.id
  const pv=el('div'),ig=el('div','ig'),top=el('div','pvr');top.append(pv,fld('Name',name));
  const paint=()=>{pv.replaceChildren(folderTile(f));ig.replaceChildren(...Object.keys(ICONS).map(k=>{const b=el('button','ib2'+(k===f.icon?' on':''));b.type='button';b.title=k;b.innerHTML=glyph(k);b.onclick=()=>{f.icon=k;paint()};return b}))};paint();
  const pin=el('input');pin.type='checkbox';pin.checked=!!f.pin;const pl=el('label','rw');pl.append(pin,'Show on desktop');
- modal((old?'Edit ':'New ')+(nf?'note folder':'folder'),[top,el('div','lab','Icon'),ig,...(nf?[pl]:[])],()=>{f.name=name.value.trim();if(nf)f.pin=pin.checked;if(old)Object.assign(old,f);else L.push(f);save();render()})}
+ modal((old?'Edit ':'New ')+(nf?'file folder':'folder'),[top,el('div','lab','Icon'),ig,...(nf?[pl]:[])],()=>{f.name=name.value.trim();if(nf)f.pin=pin.checked;if(old)Object.assign(old,f);else L.push(f);save();render()})}
 function quickDlg(id){const old=id&&S.quick.find(q=>q.id===id),f={...(old||{id:uid(),name:'',items:[]})};f.icon=f.icon||'bolt';f.items=[...(f.items||[])];
  const name=inp(f.name,'Quick start name, e.g. Morning');name.required=true;
  const pv=el('div'),ig=el('div','ig'),top=el('div','pvr');top.append(pv,fld('Name',name));
@@ -509,7 +493,7 @@ function quickDlg(id){const old=id&&S.quick.find(q=>q.id===id),f={...(old||{id:u
   const t=tile(i);t.classList.add('sm');l.append(c,t,el('span','nm',i.name));pick.append(l)});
  if(!S.items.length)pick.append(el('p','hint','Add some shortcuts first.'));
  modal(old?'Edit quick start':'New quick start',[top,el('div','lab','Icon'),ig,cnt,pick],()=>{f.name=name.value.trim();f.items=S.items.map(i=>i.id).filter(x=>sel.has(x));if(old)Object.assign(old,f);else S.quick.push(f);save();render()})}
-function tagsDlg(){const L=IT(),w=NM()?'note':'shortcut',cnt={};L.forEach(i=>{if(i.tag)cnt[i.tag]=(cnt[i.tag]||0)+1});const rows=[],box=el('div');
+function tagsDlg(){const L=IT(),w=NM()?'file':'shortcut',cnt={};L.forEach(i=>{if(i.tag)cnt[i.tag]=(cnt[i.tag]||0)+1});const rows=[],box=el('div');
  Object.keys(cnt).sort().forEach(t=>{const r=el('div','trow'),i=inp(t),n=el('span','n',cnt[t]+(cnt[t]>1?' '+w+'s':' '+w)),d=el('button','ib','✕');d.type='button';d.title='Delete tag';
   d.onclick=()=>{r.classList.toggle('del');d.textContent=r.classList.contains('del')?'↺':'✕'};r.append(i,n,d);box.append(r);rows.push([t,i,r])});
  box.prepend(el('p','lab',rows.length?'Rename a tag to change it everywhere. Give two tags the same name to merge them.':'No tags yet. Add one when you create or edit a '+w+'.'));
@@ -528,21 +512,11 @@ function modal(title,body,onOk,okText='Save'){dlg.replaceChildren();dlg.dataset.
  else f.onsubmit=e=>e.preventDefault();
  f.append(bar);dlg.append(f);if(!dlg.open)dlg.showModal()}
 const imgData=(f,max,type='image/webp',qq=.9)=>new Promise((res,rej)=>{const r=new FileReader();r.onload=()=>{const i=new Image();i.onload=()=>{const k=Math.min(1,max/Math.max(i.width,i.height));const c=document.createElement('canvas');c.width=Math.round(i.width*k);c.height=Math.round(i.height*k);c.getContext('2d').drawImage(i,0,0,c.width,c.height);res(c.toDataURL(type,qq))};i.onerror=rej;i.src=r.result};r.onerror=rej;r.readAsDataURL(f)});
-function noteDlg(id,folder=''){const old=id&&S.notes.find(i=>i.id===id);
- const it=old?{...old}:{id:uid(),name:'',body:'',tag:'',folder,pin:false,color:''};
- const name=inp(it.name,'Title (optional)'),tag=inp(it.tag,'e.g. ideas'),body=el('textarea');body.value=it.body||'';body.placeholder='Write something…';body.rows=6;
- tag.setAttribute('list','taglist');const dl=el('datalist');dl.id='taglist';[...new Set(S.notes.map(i=>i.tag).filter(Boolean))].forEach(t=>{const o=el('option');o.value=t;dl.append(o)});
- const sel=el('select');[['','No folder']].concat(S.nfolders.map(f=>[f.id,f.name])).forEach(([v,t])=>{const o=el('option','',t);o.value=v;sel.append(o)});sel.value=it.folder;
- const pin=el('input');pin.type='checkbox';pin.checked=it.pin;const pl=el('label','rw');pl.append(pin,'Show on desktop');
- const pv=el('div'),top=el('div','pvr'),drawPv=()=>pv.replaceChildren(noteTile({...it,name:name.value||'?'}));drawPv();name.oninput=()=>{if(!it.color)drawPv()};top.append(pv,fld('Title',name));
- modal(old?'Edit note':'New note',[top,fld('Content',body),fld('Tag',tag),dl,fld('Folder',sel),pl,el('div','lab','Color'),dots(it.color,['',...COLORS],c=>{it.color=c;drawPv()})],()=>{
-  Object.assign(it,{name:name.value,body:body.value,tag:tag.value.trim(),folder:sel.value,pin:pin.checked});fixTitle(it);
-  if(old)Object.assign(old,it);else S.notes.push(it);save();render()})}
-function itemDlg(id,folder=''){const old=id&&S.items.find(i=>i.id===id);
+function itemDlg(id,folder='',nn){const old=id&&[...S.items,...S.notes].find(i=>i.id===id),toN=old?S.notes.includes(old):(nn===undefined?NM():nn),L=toN?S.notes:S.items,W=toN?'file':'shortcut';
  const it=old?{...old}:{id:uid(),name:'',url:'',tag:'',folder,pin:false,img:''};
  const name=inp(it.name,'Gmail'),url=inp(it.url,'https://…'),tag=inp(it.tag,'e.g. work'),desc=inp(it.desc,'What is this for? (optional)');desc.maxLength=160;name.required=url.required=true;
- tag.setAttribute('list','taglist');const dl=el('datalist');dl.id='taglist';[...new Set(S.items.map(i=>i.tag).filter(Boolean))].forEach(t=>{const o=el('option');o.value=t;dl.append(o)});
- const sel=el('select');[['','No folder']].concat(S.folders.map(f=>[f.id,f.name])).forEach(([v,t])=>{const o=el('option','',t);o.value=v;sel.append(o)});sel.value=it.folder;
+ tag.setAttribute('list','taglist');const dl=el('datalist');dl.id='taglist';[...new Set(L.map(i=>i.tag).filter(Boolean))].forEach(t=>{const o=el('option');o.value=t;dl.append(o)});
+ const sel=el('select');[['','No folder']].concat((toN?S.nfolders:S.folders).map(f=>[f.id,f.name])).forEach(([v,t])=>{const o=el('option','',t);o.value=v;sel.append(o)});sel.value=it.folder;
  const pin=el('input');pin.type='checkbox';pin.checked=it.pin;const pl=el('label','rw');pl.append(pin,'Show on desktop');
  const pv=el('div'),sz=el('div','szc'),szIn=el('input'),szVal=el('span','v'),szRst=el('button','rs','Reset');
  szIn.type='range';szIn.min=30;szIn.max=100;szIn.step=1;szIn.className='sl';szRst.type='button';szRst.title='Back to the default size';
@@ -563,11 +537,11 @@ function itemDlg(id,folder=''){const old=id&&S.items.find(i=>i.id===id);
  const qsel=new Set(S.quick.filter(q=>(q.items||[]).includes(it.id)).map(q=>q.id)),qbox=el('div','fld');
  if(S.quick.length){qbox.append(el('span','','Quick starts'));S.quick.forEach(q=>{const l=el('label','rw'),c=el('input');c.type='checkbox';c.checked=qsel.has(q.id);c.onchange=()=>{c.checked?qsel.add(q.id):qsel.delete(q.id)};l.append(c,q.name);qbox.append(l)})}
  const imgBox=el('div','fld');imgBox.append(el('span','','Icon image'),prow,sz,iu,bfd.box);
- modal(old?'Edit shortcut':'New shortcut',[fld('Name',name),fld('Address',url),fld('Description',desc),fld('Tag',tag),dl,fld('Folder',sel),pl,...(S.quick.length?[qbox]:[]),imgBox],()=>{
+ modal((old?'Edit ':'New ')+W,[fld('Name',name),fld('Address',url),fld('Description',desc),fld('Tag',tag),dl,fld('Folder',sel),pl,...(S.quick.length&&!toN?[qbox]:[]),imgBox],()=>{
   const img=iu.value.trim()||(it.img.startsWith('data:')?it.img:'');
   if(!img)delete it.scale;
   Object.assign(it,{name:name.value.trim(),desc:desc.value.trim(),url:url.value.trim(),tag:tag.value.trim(),folder:sel.value,pin:pin.checked,img});
-  if(old){Object.assign(old,it);if(!it.scale)delete old.scale}else S.items.push(it);
+  if(old){Object.assign(old,it);if(!it.scale)delete old.scale}else L.push(it);
   S.quick.forEach(q=>{q.items=(q.items||[]).filter(x=>x!==it.id);if(qsel.has(q.id))q.items.push(it.id)});save();render()})}
 const sec=(h,...n)=>{const d=el('div','sec');d.append(el('h3','',h),...n);return d};
 const mk=(t,fn)=>{const b=el('button','btn',t);b.type='button';b.onclick=fn;return b};
@@ -593,12 +567,12 @@ function settings(){const box=el('div');
   const row=el('div','rw');row.append(rs2);
   ub.replaceChildren(el('div','lab','Times you’ve opened each shortcut ('+tot+' in total). These counts power “Most used” sorting and are saved in this browser only.'),...(rows.length?[lst]:[]),row)};usage();
  box.append(sec('Desktop',tgl('Center shortcuts','Center the icons on the desktop instead of aligning them to the left.',!!S.center,v=>{S.center=v;save();flip(applyTheme)}),tgl('Round icon corners','Rounds the icon corners and keeps a white margin around your own uploaded or linked images. Turn off for sharp corners with edge-to-edge images.',S.round!==false,v=>{S.round=v;save();applyTheme()})),
-  sec('Notes',tgl('Notes mode','Shows the Notes tab in the sidebar and your pinned notes on the desktop. Turning it off only hides them; your notes are kept.',!S.notesOff,v=>{S.notesOff=!v;if(!v){S.mode='links';Object.keys(wins).forEach(id=>{if(S.notes.some(n=>n.id===id)||S.nfolders.some(f=>f.id===id))delete wins[id]});q='';tagF='';$('#q').value=''}save();render()})),
-  sec('Tags',el('div','lab','Rename, merge or delete the tags on your '+(NM()?'notes':'shortcuts')+'.'),tg),
+  sec('Files',tgl('Files mode','Shows the Files tab in the sidebar and your pinned files on the desktop. Turning it off only hides them; your files are kept.',!S.notesOff,v=>{S.notesOff=!v;if(!v){S.mode='links';Object.keys(wins).forEach(id=>{if(S.notes.some(n=>n.id===id)||S.nfolders.some(f=>f.id===id))delete wins[id]});q='';tagF='';$('#q').value=''}save();render()})),
+  sec('Tags',el('div','lab','Rename, merge or delete the tags on your '+(NM()?'files':'shortcuts')+'.'),tg),
   sec('Usage',ub),
   sec('Import & export',dr,el('p','note','Everything is saved in this browser only. Export a backup to move it to another computer. Reset returns the page to its defaults.')));
  modal('Settings',[box],null)}
-function resetAll(){if(!confirm('Reset everything to the defaults? This deletes all shortcuts, notes, folders, quick starts, tags, open counts and appearance settings. Export a backup first if you want to keep them.'))return;S=seed();setHits({});save();applyTheme();render();dlg.close()}
+function resetAll(){if(!confirm('Reset everything to the defaults? This deletes all shortcuts, files, folders, quick starts, tags, open counts and appearance settings. Export a backup first if you want to keep them.'))return;S=seed();setHits({});save();applyTheme();render();dlg.close()}
 function exportData(){const a=el('a');a.href=URL.createObjectURL(new Blob([JSON.stringify({...S,hits:getHits()},null,1)],{type:'application/json'}));a.download='startpage-backup-'+new Date().toISOString().slice(0,10)+'.json';a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1500)}
 function importData(){const f=el('input');f.type='file';f.accept='.json,application/json';
  f.onchange=async()=>{try{const d=JSON.parse(await f.files[0].text());if(!Array.isArray(d.items))throw 0;
