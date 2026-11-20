@@ -275,7 +275,7 @@ const seed=()=>({v:2,mode:'links',notes:[],nfolders:[],theme:'light',accent:'',b
  {id:uid(),name:'Calendar',url:'https://calendar.google.com',tag:'work',folder:'f1',pin:false,img:''}]});
 let S;try{S=JSON.parse(localStorage.getItem(KEY))}catch(e){}
 if(!S||!Array.isArray(S.items))S=seed();
-if(!Array.isArray(S.quick))S.quick=[];if(!Array.isArray(S.notes))S.notes=[];if(!Array.isArray(S.nfolders))S.nfolders=[];if(S.mode!=='notes')S.mode='links';S.notes.forEach(n=>{if(n.url===undefined){n.url='';if(n.body&&!n.desc)n.desc=n.body.replace(/\s+/g,' ').trim().slice(0,160);delete n.body;delete n.color}});
+if(!Array.isArray(S.quick))S.quick=[];if(!Array.isArray(S.notes))S.notes=[];if(!Array.isArray(S.nfolders))S.nfolders=[];if(S.mode!=='notes')S.mode='links';S.notes.forEach(n=>{if(n.url===undefined){n.url='';if(n.body&&!n.desc)n.desc=n.body.replace(/\s+/g,' ').trim().slice(0,160);delete n.body;delete n.color}});migSite();
 const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(S));return true}catch(e){alert('Couldn’t save: browser storage is full. Try a smaller background or icon image.');return false}};
 const lum=h=>{const n=parseInt(h.slice(1),16);return(.299*(n>>16)+.587*(n>>8&255)+.114*(n&255))/255};
 function applyTheme(){const t=THEMES[S.theme]||THEMES.light,r=document.documentElement.style,acc=S.accent||t.acc;
@@ -286,9 +286,10 @@ function applyTheme(){const t=THEMES[S.theme]||THEMES.light,r=document.documentE
 const norm=u=>/^[a-z][a-z0-9+.-]*:/i.test(u)?u:'https://'+u;
 const host=u=>{try{return new URL(norm(u)).hostname}catch(e){return''}};
 const hue=s=>{let h=0;for(const c of s)h=(h*31+c.charCodeAt(0))%360;return`hsl(${h} 48% 48%)`};
+function migSite(){if(S.siteMig)return;[...S.items,...S.notes].forEach(i=>{if(i.site===undefined&&!i.img&&i.url)i.site=true});S.siteMig=1}
 function tile(it){const d=el('div','tile');
  const letter=()=>{d.className='tile';d.replaceChildren();d.textContent=(it.name||'?')[0].toUpperCase();d.style.background=hue(it.name||'?')};
- const h=host(it.url),src=it.img||(h&&'https://www.google.com/s2/favicons?sz=128&domain='+h);
+ const h=host(it.url),src=it.img||(it.site&&h&&'https://www.google.com/s2/favicons?sz=128&domain='+h);
  if(src){d.classList.add('has',it.img&&!/^https:\/\/api\.iconify\.design\//.test(it.img)?'cus':'fav');const i=new Image();i.alt='';i.draggable=false;i.onerror=letter;if(isIc(src))icGet(src).then(u=>{i.src=u},letter);else i.src=src;if(it.img&&it.scale){i.style.width=i.style.height=it.scale+'%';i.style.objectFit='contain'}d.append(i)}else letter();return d}
 const defScale=it=>/^https:\/\/api\.iconify\.design\//.test(it.img||'')?64:(S.round!==false?78:100);
 /* Iconify cache: each icon SVG is downloaded once, kept in localStorage, and reused (avoids API rate limits) */
@@ -531,9 +532,10 @@ function itemDlg(id,folder='',nn){const old=id&&[...S.items,...S.notes].find(i=>
  const iu=inp(it.img.startsWith('data:')?'':it.img,'…or paste an image URL');
  const up=upload('Upload image',async f=>{try{it.img=await imgData(f,128);iu.value='';drawPv()}catch(e){alert('Couldn’t read that image.')}});
  iu.onchange=()=>{it.img=iu.value.trim();drawPv()};name.onchange=url.onchange=drawPv;
- const rm=el('button','btn','Use site icon');rm.type='button';rm.onclick=()=>{it.img='';delete it.scale;iu.value='';drawPv()};
+ const rm=el('button','btn','Use site icon');rm.type='button';rm.onclick=()=>{it.img='';it.site=true;delete it.scale;iu.value='';drawPv()};
+ const rl=el('button','btn','Letter icon');rl.type='button';rl.title='Plain colored letter, no site icon';rl.onclick=()=>{it.img='';it.site=false;delete it.scale;iu.value='';drawPv()};
  drawPv();
- const bfd=brandFinder(it,name,iu,drawPv),acts=el('div','rw');acts.append(up,rm,bfd.btn);const prow=el('div','pvr');prow.append(pv,acts);
+ const bfd=brandFinder(it,name,iu,drawPv),acts=el('div','rw');acts.append(up,rm,rl,bfd.btn);const prow=el('div','pvr');prow.append(pv,acts);
  const qsel=new Set(S.quick.filter(q=>(q.items||[]).includes(it.id)).map(q=>q.id)),qbox=el('div','fld');
  if(S.quick.length){qbox.append(el('span','','Quick starts'));S.quick.forEach(q=>{const l=el('label','rw'),c=el('input');c.type='checkbox';c.checked=qsel.has(q.id);c.onchange=()=>{c.checked?qsel.add(q.id):qsel.delete(q.id)};l.append(c,q.name);qbox.append(l)})}
  const imgBox=el('div','fld');imgBox.append(el('span','','Icon image'),prow,sz,iu,bfd.box);
@@ -577,7 +579,7 @@ function exportData(){const a=el('a');a.href=URL.createObjectURL(new Blob([JSON.
 function importData(){const f=el('input');f.type='file';f.accept='.json,application/json';
  f.onchange=async()=>{try{const d=JSON.parse(await f.files[0].text());if(!Array.isArray(d.items))throw 0;
   if(!confirm('Replace everything on this page with the backup?'))return;
-  S={...seed(),...d,folders:Array.isArray(d.folders)?d.folders:[],quick:Array.isArray(d.quick)?d.quick:[],notes:Array.isArray(d.notes)?d.notes:[],nfolders:Array.isArray(d.nfolders)?d.nfolders:[]};delete S.hits;setHits(d.hits&&typeof d.hits==='object'?d.hits:{});if(!SORTS[S.sort])S.sort='custom';if(save()){applyTheme();render()}}catch(e){alert('That file isn’t a valid backup.')}};f.click()}
+  S={...seed(),...d,folders:Array.isArray(d.folders)?d.folders:[],quick:Array.isArray(d.quick)?d.quick:[],notes:Array.isArray(d.notes)?d.notes:[],nfolders:Array.isArray(d.nfolders)?d.nfolders:[]};migSite();delete S.hits;setHits(d.hits&&typeof d.hits==='object'?d.hits:{});if(!SORTS[S.sort])S.sort='custom';if(save()){applyTheme();render()}}catch(e){alert('That file isn’t a valid backup.')}};f.click()}
 function tick(){const d=new Date();$('#ck').textContent=d.toLocaleTimeString([],{hour:'numeric',minute:'2-digit'});$('#cd').textContent=d.toLocaleDateString([],{weekday:'long',month:'long',day:'numeric'})}
 tick();setInterval(tick,10000);applyTheme();render();
 </script>
