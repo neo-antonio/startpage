@@ -286,10 +286,10 @@ function applyTheme(){const t=THEMES[S.theme]||THEMES.light,r=document.documentE
 const norm=u=>/^[a-z][a-z0-9+.-]*:/i.test(u)?u:'https://'+u;
 const host=u=>{try{return new URL(norm(u)).hostname}catch(e){return''}};
 const hue=s=>{let h=0;for(const c of s)h=(h*31+c.charCodeAt(0))%360;return`hsl(${h} 48% 48%)`};
-function migSite(){if(S.siteMig)return;[...S.items,...S.notes].forEach(i=>{if(i.site===undefined&&!i.img&&i.url)i.site=true});S.siteMig=1}
+function migSite(){if(S.siteMig2)return;[...S.items,...S.notes].forEach(i=>{if(i.sh===undefined&&i.url)i.sh=host(i.url);delete i.site});S.siteMig2=1}
 function tile(it){const d=el('div','tile');
  const letter=()=>{d.className='tile';d.replaceChildren();d.textContent=(it.name||'?')[0].toUpperCase();d.style.background=hue(it.name||'?')};
- const h=host(it.url),src=it.img||(it.site&&h&&'https://www.google.com/s2/favicons?sz=128&domain='+h);
+ const h=host(it.url),sh=it.sh===undefined?h:it.sh,src=it.img||(sh&&'https://www.google.com/s2/favicons?sz=128&domain='+sh);
  if(src){d.classList.add('has',it.img&&!/^https:\/\/api\.iconify\.design\//.test(it.img)?'cus':'fav');const i=new Image();i.alt='';i.draggable=false;i.onerror=letter;if(isIc(src))icGet(src).then(u=>{i.src=u},letter);else i.src=src;if(it.img&&it.scale){i.style.width=i.style.height=it.scale+'%';i.style.objectFit='contain'}d.append(i)}else letter();return d}
 const defScale=it=>/^https:\/\/api\.iconify\.design\//.test(it.img||'')?64:(S.round!==false?78:100);
 /* Iconify cache: each icon SVG is downloaded once, kept in localStorage, and reused (avoids API rate limits) */
@@ -532,8 +532,8 @@ function itemDlg(id,folder='',nn){const old=id&&[...S.items,...S.notes].find(i=>
  const iu=inp(it.img.startsWith('data:')?'':it.img,'…or paste an image URL');
  const up=upload('Upload image',async f=>{try{it.img=await imgData(f,128);iu.value='';drawPv()}catch(e){alert('Couldn’t read that image.')}});
  iu.onchange=()=>{it.img=iu.value.trim();drawPv()};name.onchange=url.onchange=drawPv;
- const rm=el('button','btn','Use site icon');rm.type='button';rm.onclick=()=>{it.img='';it.site=true;delete it.scale;iu.value='';drawPv()};
- const rl=el('button','btn','Letter icon');rl.type='button';rl.title='Plain colored letter, no site icon';rl.onclick=()=>{it.img='';it.site=false;delete it.scale;iu.value='';drawPv()};
+ const rm=el('button','btn','Use site icon');rm.type='button';rm.onclick=()=>{it.img='';it.sh=host(url.value);delete it.scale;iu.value='';drawPv()};
+ const rl=el('button','btn','Letter icon');rl.type='button';rl.title='Plain colored letter, no site icon';rl.onclick=()=>{it.img='';it.sh='';delete it.scale;iu.value='';drawPv()};
  drawPv();
  const bfd=brandFinder(it,name,iu,drawPv),acts=el('div','rw');acts.append(up,rm,rl,bfd.btn);const prow=el('div','pvr');prow.append(pv,acts);
  const qsel=new Set(S.quick.filter(q=>(q.items||[]).includes(it.id)).map(q=>q.id)),qbox=el('div','fld');
@@ -542,7 +542,7 @@ function itemDlg(id,folder='',nn){const old=id&&[...S.items,...S.notes].find(i=>
  modal((old?'Edit ':'New ')+W,[fld('Name',name),fld('Address',url),fld('Description',desc),fld('Tag',tag),dl,fld('Folder',sel),pl,...(S.quick.length&&!toN?[qbox]:[]),imgBox],()=>{
   const img=iu.value.trim()||(it.img.startsWith('data:')?it.img:'');
   if(!img)delete it.scale;
-  Object.assign(it,{name:name.value.trim(),desc:desc.value.trim(),url:url.value.trim(),tag:tag.value.trim(),folder:sel.value,pin:pin.checked,img});
+  Object.assign(it,{name:name.value.trim(),desc:desc.value.trim(),url:url.value.trim(),tag:tag.value.trim(),folder:sel.value,pin:pin.checked,img,sh:it.sh===undefined?host(url.value.trim()):it.sh});
   if(old){Object.assign(old,it);if(!it.scale)delete old.scale}else L.push(it);
   S.quick.forEach(q=>{q.items=(q.items||[]).filter(x=>x!==it.id);if(qsel.has(q.id))q.items.push(it.id)});save();render()})}
 const sec=(h,...n)=>{const d=el('div','sec');d.append(el('h3','',h),...n);return d};
