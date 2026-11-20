@@ -286,7 +286,7 @@ function applyTheme(){const t=THEMES[S.theme]||THEMES.light,r=document.documentE
 const norm=u=>/^[a-z][a-z0-9+.-]*:/i.test(u)?u:'https://'+u;
 const host=u=>{try{return new URL(norm(u)).hostname}catch(e){return''}};
 const hue=s=>{let h=0;for(const c of s)h=(h*31+c.charCodeAt(0))%360;return`hsl(${h} 48% 48%)`};
-function migSite(){if(S.siteMig2)return;[...S.items,...S.notes].forEach(i=>{if(i.sh===undefined&&i.url)i.sh=host(i.url);delete i.site});S.siteMig2=1}
+function migSite(){if(S.siteMig2)return;const hs=u=>{try{return new URL(/^[a-z][a-z0-9+.-]*:/i.test(u)?u:'https://'+u).hostname}catch(e){return''}};[...S.items,...S.notes].forEach(i=>{if(i.sh===undefined&&i.url)i.sh=hs(i.url);delete i.site});S.siteMig2=1}
 function tile(it){const d=el('div','tile');
  const letter=()=>{d.className='tile';d.replaceChildren();d.textContent=(it.name||'?')[0].toUpperCase();d.style.background=hue(it.name||'?')};
  const h=host(it.url),sh=it.sh===undefined?h:it.sh,src=it.img||(sh&&'https://www.google.com/s2/favicons?sz=128&domain='+sh);
