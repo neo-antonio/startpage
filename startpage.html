@@ -336,7 +336,7 @@ function syncMode(){const n=NM(),w=n?'note':'shortcut';$('#mode').hidden=!!S.not
  const a=$('#add');a.title='New '+w;a.setAttribute('aria-label','New '+w);$('#sort').setAttribute('aria-label','Sort '+w+'s');$('#q').placeholder=n?'Search files':'Search'}
 function setMode(m){if(NM()===(m==='notes'))return;S.mode=m;q='';tagF='';$('#q').value='';save();render();
  if(!RM)$('#list').animate([{opacity:0,transform:'translateY(6px)'},{opacity:1,transform:'none'}],{duration:240,easing:'cubic-bezier(.2,.8,.2,1)'})}
-const link=(it,c)=>{const a=el('a',c);if(it.url)a.href=norm(it.url);a.target='_blank';a.rel='noopener';a.dataset.t='i';a.dataset.id=it.id;return a};
+const link=(it,c)=>{const a=el('a',c);if(it.url)a.href=norm(it.url);a.target=S.newTab===false?'_self':'_blank';a.rel='noopener';a.dataset.t='i';a.dataset.id=it.id;return a};
 let tagF='',q='';
 function render(){syncSort();syncMode();renderSide();renderDesk();renderWins()}
 function renderSide(){
@@ -428,6 +428,7 @@ function renderWins(){const W=$('#wins');W.replaceChildren();
   (isQ?quickItems(f):inFolder(isNF?S.notes:S.items,id)).forEach(i=>{const a=link(i,'ico');a.append(tile(i),el('span','',i.name));b.append(a)});
   if(!b.children.length)b.append(el('p','hint',isQ?'Empty quick start. Right-click it and choose Edit to add shortcuts.':isNF?'Empty folder. Right-click to add a file here.':'Empty folder. Right-click to add a shortcut here.'));
   w.append(h,b);W.append(w)}}
+function dupItem(it){const L=S.notes.includes(it)?S.notes:S.items,c={...it,id:uid(),name:(it.name||'')+' copy',pin:false};L.splice(L.indexOf(it)+1,0,c);save();render()}
 /* menus */
 const ctx=$('#ctx');
 function menu(x,y,items){const ck=items.some(i=>i.length>3);ctx.replaceChildren(...items.map(([t,f,dg,on])=>{const b=el('button',(dg?'dg ':'')+(ck?'ck'+(on?' on':''):''),t);b.onclick=()=>{ctx.hidden=true;f()};return b}));
@@ -435,7 +436,7 @@ function menu(x,y,items){const ck=items.some(i=>i.length>3);ctx.replaceChildren(
 addEventListener('contextmenu',e=>{if(e.target.closest('dialog,input,textarea,#ctx'))return;e.preventDefault();
  const n=e.target.closest('[data-t]'),x=e.clientX,y=e.clientY;
  if(n&&n.dataset.t==='i'){const it=[...S.items,...S.notes].find(i=>i.id===n.dataset.id);
-  menu(x,y,[['Open in new tab',()=>{hit(it.id);open(norm(it.url),'_blank')}],['Edit',()=>itemDlg(it.id)],[it.pin?'Unpin from desktop':'Pin to desktop',()=>{it.pin=!it.pin;save();render()}],['Delete',()=>{if(confirm('Delete “'+it.name+'”?')){S.items=S.items.filter(i=>i!==it);S.notes=S.notes.filter(i=>i!==it);S.quick.forEach(q=>q.items=(q.items||[]).filter(x=>x!==it.id));{const h=getHits();delete h[it.id];setHits(h)}save();render()}},1]])}
+  menu(x,y,[['Open in new tab',()=>{hit(it.id);open(norm(it.url),'_blank')}],['Edit',()=>itemDlg(it.id)],['Duplicate',()=>dupItem(it)],[it.pin?'Unpin from desktop':'Pin to desktop',()=>{it.pin=!it.pin;save();render()}],['Delete',()=>{if(confirm('Delete “'+it.name+'”?')){S.items=S.items.filter(i=>i!==it);S.notes=S.notes.filter(i=>i!==it);S.quick.forEach(q=>q.items=(q.items||[]).filter(x=>x!==it.id));{const h=getHits();delete h[it.id];setHits(h)}save();render()}},1]])}
  else if(n&&n.dataset.t==='nf'){const f=S.nfolders.find(i=>i.id===n.dataset.id);
   menu(x,y,[['Open',()=>openWin(f.id)],['Add file here',()=>itemDlg(null,f.id,true)],['Edit folder',()=>folderDlg(f.id,1)],[f.pin?'Unpin from desktop':'Pin to desktop',()=>{f.pin=!f.pin;save();render()}],['Delete folder',()=>{if(confirm('Delete folder “'+f.name+'”? Its files move out of the folder.')){S.notes.forEach(i=>{if(i.folder===f.id)i.folder=''});S.nfolders=S.nfolders.filter(i=>i!==f);save();render()}},1]])}
  else if(n&&n.dataset.t==='q'){const q=S.quick.find(i=>i.id===n.dataset.id);
@@ -503,7 +504,7 @@ function tagsDlg(){const L=IT(),w=NM()?'file':'shortcut',cnt={};L.forEach(i=>{if
 /* dialogs */
 const dlg=$('#dlg');
 {let down=0;const outside=e=>{const r=dlg.getBoundingClientRect();return e.clientX<r.left||e.clientX>r.right||e.clientY<r.top||e.clientY>r.bottom};
- dlg.addEventListener('pointerdown',e=>{down=dlg.dataset.out==='1'&&outside(e)});
+ dlg.addEventListener('pointerdown',e=>{down=outside(e)});
  dlg.addEventListener('click',e=>{if(down&&outside(e))dlg.close();down=0})}
 const fld=(l,i)=>{const w=el('label','fld');w.append(el('span','',l),i);return w};
 const inp=(v,ph,type='text')=>{const i=el('input');i.type=type;i.value=v||'';i.placeholder=ph||'';return i};
@@ -569,6 +570,7 @@ function settings(){const box=el('div');
   const row=el('div','rw');row.append(rs2);
   ub.replaceChildren(el('div','lab','Times you’ve opened each shortcut ('+tot+' in total). These counts power “Most used” sorting and are saved in this browser only.'),...(rows.length?[lst]:[]),row)};usage();
  box.append(sec('Desktop',tgl('Center shortcuts','Center the icons on the desktop instead of aligning them to the left.',!!S.center,v=>{S.center=v;save();flip(applyTheme)}),tgl('Round icon corners','Rounds the icon corners and keeps a white margin around your own uploaded or linked images. Turn off for sharp corners with edge-to-edge images.',S.round!==false,v=>{S.round=v;save();applyTheme()})),
+  sec('Opening',tgl('Open in a new tab','Shortcuts and files open in a new tab. Turn off to replace this page instead. Quick starts always open in new tabs.',S.newTab!==false,v=>{S.newTab=v;save();render()})),
   sec('Files',tgl('Files mode','Shows the Files tab in the sidebar and your pinned files on the desktop. Turning it off only hides them; your files are kept.',!S.notesOff,v=>{S.notesOff=!v;if(!v){S.mode='links';Object.keys(wins).forEach(id=>{if(S.notes.some(n=>n.id===id)||S.nfolders.some(f=>f.id===id))delete wins[id]});q='';tagF='';$('#q').value=''}save();render()})),
   sec('Tags',el('div','lab','Rename, merge or delete the tags on your '+(NM()?'files':'shortcuts')+'.'),tg),
   sec('Usage',ub),
